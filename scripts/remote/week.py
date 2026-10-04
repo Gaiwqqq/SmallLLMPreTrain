@@ -789,6 +789,8 @@ def main():
         if worker and worker.poll() is None:
             os.killpg(worker.pid, signal.SIGTERM)
             worker.wait(timeout=30)
+        if adopted_worker_pid and data_worker_alive(adopted_worker_pid):
+            os.killpg(adopted_worker_pid, signal.SIGTERM)
         if worker_log:
             worker_log.close()
         lock.close()
