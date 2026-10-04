@@ -69,6 +69,7 @@ def synchronize_docs(root: Path, repo_id: str, api: HubApi) -> None:
         allow_patterns=["*.md"],
         commit_message="Synchronize phase learning guides",
         disable_tqdm=True,
+        tracker_path=root / "cache/modelscope/docs-upload.json",
     )
 
 
