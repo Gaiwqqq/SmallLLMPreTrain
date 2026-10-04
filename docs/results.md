@@ -38,3 +38,4 @@
 | pilot-previous-attempt | retained | Incomplete packing preserved at /diff/gaiwq/llm_pretrain/data/failed/pilot100m-1791131011 |
 | full-data-background | running | /diff/gaiwq/llm_pretrain/logs/full-data.log |
 | reproduce-baselines | complete | /diff/gaiwq/llm_pretrain/logs/reproduce-baselines.log |
+| verify-ddp-resume | complete | /diff/gaiwq/llm_pretrain/logs/verify-ddp-resume.log |
