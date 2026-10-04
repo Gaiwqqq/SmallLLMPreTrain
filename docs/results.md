@@ -38,6 +38,23 @@
 
 213M 四卡 eager 合成数据基准：micro-batch=16/global-batch=256，217,856 输入 token/s，峰值显存约 44.70 GiB/卡。该测量排除了下载、packing、验证和 checkpoint 上传，正式训练预算会留出余量。最新测试为 39 passed；保留 FP32 参数的四卡 BF16 TRL 接口复测也通过（`runs/sft-interface-smoke-v3/summary.json`）。
 
+## 自训 Tokenizer 的 213M pilot
+
+四组均从随机权重训练，读取 99,997,696 token、完成 191 次更新，使用相同混合语料和自训 BPE。
+
+| 学习率 | seed | 最终验证 loss |
+|---|---:|---:|
+| 3e-4 | 2026 | 5.988814 |
+| 6e-4 | 2026 | 6.031944 |
+| 1e-3 | 2026 | 6.136201 |
+| 6e-4 | 2027 | 6.013090 |
+
+本轮正式训练选择 3e-4，依据见 `runs/lr-selection.json`。与 99M 的编码和语料不同，两个阶段的 loss 数值不能直接比较。
+
+`exports/pilot-base-lr3e4` 已通过 HF 导出和四个纯文本续写样例测试。实际输出重复明显：例如 `Water is important because` 后重复生成 “the little girl” 等故事片段。这是尚未充分训练的 Base，不是合格聊天模型；原始样例保留在 `runs/pilot-completions.json`，后续应检验扩大预训练量和 SFT 是否带来改善。
+
+四卡 SFT 恢复快照接口也已实测通过并上传：`sft-interface-smoke-v4` 含模型、optimizer、scheduler、trainer_state 和四份 RNG。它使用极小合成模型，仅验证接口。最新常规测试为 39 passed（11.46s）。
+
 ## 自动阶段进度
 
 | 阶段 | 状态 | 说明 |

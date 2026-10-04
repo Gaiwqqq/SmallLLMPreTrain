@@ -43,6 +43,8 @@ nohup dummym-publish --docs --watch > "$PRETRAIN_ROOT/logs/modelscope.log" 2>&1 
 
 `workflow.json` 记录阶段、PID、命令和状态；`docs/results.md` 随阶段同步。执行器加文件锁，避免重复启动。重启时跳过完成阶段，训练从完整 checkpoint 恢复；数据/Tokenizer 若留下不完整目录，先审阅日志并保留失败目录再重做。推理与辅助评测分别使用 envs/inference、envs/evaluation。
 
+重启控制器时，如果记录的数据任务 PID 仍运行且命令与工作目录属于本工程，会接管该任务，等待其完成，而不另开一次下载/清洗。已完成的性能选择也会复用。这样可以保留正在运行的数据准备并更新后续阶段代码。
+
 ## 本次结果
 
 远程隔离环境已安装并锁定，PyTorch 2.7.1+cu126 识别四张 H20；反向隧道已用于环境和数据下载。产物均位于指定根目录。 实测证据见 [运行记录](results.md)。

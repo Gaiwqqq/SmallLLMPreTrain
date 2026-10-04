@@ -179,6 +179,9 @@ def wait_existing_reproduction(workflow: Workflow, pid: int | None):
 
 
 def verify_and_benchmark(workflow: Workflow) -> dict:
+    selection = ROOT / "runs/performance-selection.json"
+    if selection.exists() and workflow.complete("benchmark-4-gpu"):
+        return json.loads(selection.read_text())
     workflow.run(
         "verify-ddp-resume",
         [
@@ -460,6 +463,19 @@ def pretrain(workflow: Workflow, performance: dict, learning_rate: float):
         max_hours=1,
     )
     workflow.run(
+        "base-completion-smoke",
+        [
+            PYTHON,
+            "scripts/evaluation/complete.py",
+            "--model",
+            str(ROOT / "exports/base"),
+            "--output",
+            str(ROOT / "runs/base-completions.json"),
+        ],
+        gpu="0",
+        max_hours=1,
+    )
+    workflow.run(
         "publish-base", cli("dummym-publish", "--folder", ROOT / "exports/base"), max_hours=2
     )
 
@@ -677,6 +693,20 @@ def install_inference(workflow: Workflow):
     )
 
 
+def data_worker_alive(pid: int | None) -> bool:
+    """重启控制器时接管本工程的数据任务，避免重复下载和并发写清洗目录。"""
+    if not pid:
+        return False
+    process = Path(f"/proc/{pid}")
+    try:
+        return (
+            b"scripts/data/build_full.py" in (process / "cmdline").read_bytes()
+            and (process / "cwd").resolve() == ROOT / "repo"
+        )
+    except (FileNotFoundError, PermissionError):
+        return False
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--existing-reproduction-pid", type=int)
@@ -686,6 +716,7 @@ def main():
     workflow = Workflow(ROOT)
     worker = None
     worker_log = None
+    adopted_worker_pid = None
     try:
         workflow.run("engineering-checks", [PYTHON, "-m", "pytest", "tests", "-q"], max_hours=1)
         workflow.run(
@@ -700,20 +731,24 @@ def main():
         )
         prepare_pilot(workflow)
         if not (ROOT / "data/capacities.json").exists():
-            worker_log = (ROOT / "logs/full-data.log").open("a")
-            worker = subprocess.Popen(
-                [PYTHON, "scripts/data/build_full.py"],
-                cwd=ROOT / "repo",
-                stdout=worker_log,
-                stderr=worker_log,
-                start_new_session=True,
-            )
-            workflow.record(
-                "full-data-background",
-                "running",
-                pid=worker.pid,
-                log=str(ROOT / "logs/full-data.log"),
-            )
+            previous_pid = workflow.state["stages"].get("full-data-background", {}).get("pid")
+            if data_worker_alive(previous_pid):
+                adopted_worker_pid = previous_pid
+            else:
+                worker_log = (ROOT / "logs/full-data.log").open("a")
+                worker = subprocess.Popen(
+                    [PYTHON, "scripts/data/build_full.py"],
+                    cwd=ROOT / "repo",
+                    stdout=worker_log,
+                    stderr=worker_log,
+                    start_new_session=True,
+                )
+                workflow.record(
+                    "full-data-background",
+                    "running",
+                    pid=worker.pid,
+                    log=str(ROOT / "logs/full-data.log"),
+                )
         wait_existing_reproduction(workflow, args.existing_reproduction_pid)
         performance = verify_and_benchmark(workflow)
         learning_rate = select_pretraining_lr(workflow, performance)
@@ -724,6 +759,12 @@ def main():
                 time.sleep(10)
             if worker.returncode:
                 raise RuntimeError("Full data preparation failed; inspect logs/full-data.log")
+        while adopted_worker_pid and data_worker_alive(adopted_worker_pid):
+            if workflow.remaining_seconds() < 20 * 3600:
+                raise TimeoutError("Full data preparation exhausted available pretraining time")
+            time.sleep(10)
+        if not (ROOT / "data/capacities.json").exists():
+            raise RuntimeError("Full data preparation ended without a complete capacity report")
         workflow.record(
             "full-data-background",
             "complete",

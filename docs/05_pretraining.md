@@ -31,7 +31,14 @@ python -m torch.distributed.run --standalone --nproc_per_node=4 --no-python \
 
 ## 本次结果
 
-213M 的四个学习率/随机种子 pilot 已并行启动，每卡一个任务；完整数据准备同时进行。正式 Base 训练尚未开始，token 预算尚未冻结。 实测证据见 [运行记录](results.md)。
+213M 的四个学习率/随机种子 pilot 已完成，每组约 100M token；本轮选择 3e-4（验证 loss 5.988814）。自训模型已导出并能执行续写，但四个样例重复明显，尚未具备可靠沟通能力。完整数据准备同时进行；正式 Base 训练尚未开始，token 预算尚未冻结。实测证据见 [运行记录](results.md)。
+
+Base 的纯文本续写入口是 `scripts/evaluation/complete.py`；它不套用聊天模板。示例：
+
+```bash
+python scripts/evaluation/complete.py --model "$PRETRAIN_ROOT/exports/pilot-base-lr3e4" \
+  --output "$PRETRAIN_ROOT/runs/new-pilot-completions.json"
+```
 
 ## 下一步
 
