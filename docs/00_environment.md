@@ -45,7 +45,7 @@ nohup dummym-publish --docs --watch > "$PRETRAIN_ROOT/logs/modelscope.log" 2>&1 
 
 ## 本次结果
 
-待本次运行验证；历史实验结果不视为本次结果。实测状态见 [运行记录](results.md)。
+远程隔离环境已安装并锁定，PyTorch 2.7.1+cu126 识别四张 H20；反向隧道已用于环境和数据下载。产物均位于指定根目录。 实测证据见 [运行记录](results.md)。
 
 ## 下一步
 

@@ -30,7 +30,7 @@ python scripts/train/pretrain.py \
 
 ## 本次结果
 
-待本次运行验证；历史实验结果不视为本次结果。实测状态见 [运行记录](results.md)。
+39M 与六组 99M 均完成约 100M token 训练。39M 验证 loss 为 4.219103；99M 最好一组为 3.647846。两组 seed 均支持 LR=1e-3、warmup=300；详细表格和曲线见运行记录。 实测证据见 [运行记录](results.md)。
 
 ## 下一步
 

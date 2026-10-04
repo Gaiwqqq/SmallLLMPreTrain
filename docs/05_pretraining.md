@@ -15,9 +15,9 @@ Base checkpoint、曲线、独立验证和模型卡。
 ```bash
 python -m torch.distributed.run --standalone --nproc_per_node=4 --no-python \
   "$PRETRAIN_ROOT/envs/train/bin/dummym-pretrain" \
-  --model-config configs/model/p213m.yaml --data-dir ../data/tokenized/english10b \
+  --model-config configs/model/p213m.yaml --data-dir ../data/tokenized/english \
   --output-dir ../runs/m04_base --total-tokens 9999996928 \
-  --global-batch-size 256 --micro-batch-size 8 --learning-rate 6e-4 \
+  --global-batch-size 256 --micro-batch-size 16 --learning-rate 6e-4 \
   --max-hours 96
 ```
 
@@ -31,7 +31,7 @@ python -m torch.distributed.run --standalone --nproc_per_node=4 --no-python \
 
 ## 本次结果
 
-待本次运行验证；历史实验结果不视为本次结果。实测状态见 [运行记录](results.md)。
+213M 的四个学习率/随机种子 pilot 已并行启动，每卡一个任务；完整数据准备同时进行。正式 Base 训练尚未开始，token 预算尚未冻结。 实测证据见 [运行记录](results.md)。
 
 ## 下一步
 

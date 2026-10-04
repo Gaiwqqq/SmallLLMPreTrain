@@ -32,7 +32,7 @@ pytest tests -q
 
 ## 本次结果
 
-待本次运行验证；历史实验结果不视为本次结果。实测状态见 [运行记录](results.md)。
+39 项测试和全仓 Ruff 检查通过；核心实现与结果说明已分阶段提交。ModelScope 私有仓库已创建，基线 checkpoint 和 README 自动发布流程已运行。 实测证据见 [运行记录](results.md)。
 
 ## 下一步
 

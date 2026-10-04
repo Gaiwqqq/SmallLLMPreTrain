@@ -32,7 +32,7 @@ FSDP2 对照见 `scripts/train/verify_fsdp.py`。教学模型返回 dataclass；
 
 ## 本次结果
 
-待本次运行验证；历史实验结果不视为本次结果。实测状态见 [运行记录](results.md)。
+四卡 DDP 更新、BF16 断点恢复和 FSDP2 教学对照通过。213M 四卡 eager 合成数据吞吐约 217,856 token/s，micro-batch=16、每卡峰值约 44.70 GiB。torch.compile 对照有 12 个 logits 超出事先规定的误差，因此自动保留已验证的 eager 路线，没有放宽阈值。 实测证据见 [运行记录](results.md)。
 
 ## 下一步
 
