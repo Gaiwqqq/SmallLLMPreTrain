@@ -16,12 +16,16 @@ def main():
     parser.add_argument("--tokenizer", type=Path, required=True)
     parser.add_argument("--source", required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument(
+        "--only-validation", action="store_true", help="只测量验证和测试容量，适用于 pilot"
+    )
     args = parser.parse_args()
     tokenizer = Tokenizer.from_file(str(args.tokenizer))
     tokenizer.no_padding()
     tokenizer.no_truncation()
     counts = {}
-    for split in ("train", "validation", "test"):
+    splits = ("validation", "test") if args.only_validation else ("train", "validation", "test")
+    for split in splits:
         count, documents, batch = 0, 0, []
         with (args.clean / f"{args.source}.{split}.jsonl").open() as stream:
             for line in stream:

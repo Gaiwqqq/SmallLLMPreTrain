@@ -33,6 +33,8 @@ class Workflow:
             }
         )
         self.deadline = self.state["started_at"] + self.state["budget_hours"] * 3600
+        self.state["status"] = "running"
+        write_json(self.path, self.state)
 
     def record(self, name: str, status: str, **details):
         self.state["stages"][name] = {"status": status, "updated_at": time.time(), **details}

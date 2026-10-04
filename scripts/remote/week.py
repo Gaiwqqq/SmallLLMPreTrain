@@ -101,6 +101,53 @@ def prepare_pilot(workflow: Workflow):
         ),
         max_hours=4,
     )
+    workflow.jobs(
+        [
+            Job(
+                f"pilot-capacity-{source}",
+                [
+                    PYTHON,
+                    "scripts/data/count_tokens.py",
+                    "--clean",
+                    str(clean),
+                    "--tokenizer",
+                    str(ROOT / "data/tokenizer/english32k/tokenizer.json"),
+                    "--source",
+                    source,
+                    "--only-validation",
+                    "--output",
+                    str(ROOT / "data" / f"pilot-capacity-{source}.json"),
+                ],
+            )
+            for source in WEIGHTS
+        ],
+        max_hours=1,
+    )
+    capacities = {
+        source: json.loads((ROOT / "data" / f"pilot-capacity-{source}.json").read_text())
+        for source in WEIGHTS
+    }
+    validation_tokens = int(
+        min(
+            1_000_000,
+            *(
+                capacities[source][split]["tokens"] / weight
+                for source, weight in WEIGHTS.items()
+                for split in ("validation", "test")
+            ),
+        )
+        * 0.95
+    )
+    if validation_tokens < 100_000:
+        raise RuntimeError("Pilot validation capacity is too small; expand the clean pilot")
+    packed = ROOT / "data/tokenized/pilot100m"
+    if packed.exists() and not (packed / "summary.json").exists():
+        failed = ROOT / "data/failed" / f"pilot100m-{int(time.time())}"
+        failed.parent.mkdir(parents=True, exist_ok=True)
+        packed.rename(failed)
+        workflow.record(
+            "pilot-previous-attempt", "retained", note=f"Incomplete packing preserved at {failed}"
+        )
     workflow.run(
         "pack-pilot",
         cli(
@@ -112,7 +159,7 @@ def prepare_pilot(workflow: Workflow):
             "--train-tokens",
             100_000_000,
             "--validation-tokens",
-            1_000_000,
+            validation_tokens,
             "--output",
             ROOT / "data/tokenized/pilot100m",
         ),

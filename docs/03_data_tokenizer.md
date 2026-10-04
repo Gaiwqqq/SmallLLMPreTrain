@@ -36,6 +36,10 @@ dummym-pack --clean ../data/clean/english \
 
 验收：split 无精确重叠；词表 32K；特殊 token ID 正确；round-trip、ID 范围、尺寸、来源配额与指纹通过。语料不足时报错，绝不悄悄重复文档凑预算。
 
+本次 pilot 的初始验证预算为 1M，其中 FineWeb 配额约 700K；但实际清洗后只有约 473K 验证 token，因此首次 packing 正确拒绝了该预算。现先用自训 Tokenizer 精确测量各来源的 validation/test 容量，再选择可同时满足 70/25/5 配比的预算，并保留 5% 余量；失败目录保存在 data/failed 下。相关配额与未完成标记测试已通过。
+
+文档哈希比例不等于 token 比例。更换 Tokenizer 后，验证 loss/perplexity 也不能直接与原 Mistral Tokenizer 阶段比较；跨模型结论需要相同编码和评测条件。
+
 ## 本次结果
 
 待本次运行验证；历史实验结果不视为本次结果。实测状态见 [运行记录](results.md)。
