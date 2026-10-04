@@ -1,6 +1,7 @@
 """完整 checkpoint 的 ModelScope 归档；认证与训练循环相互独立。"""
 
 import argparse
+import fcntl
 import hashlib
 import json
 import os
@@ -114,6 +115,10 @@ def main() -> None:
     parser.add_argument("--docs", action="store_true")
     parser.add_argument("--folder", type=Path, help="额外上传导出模型，必须位于 exports 下")
     args = parser.parse_args()
+    watch_lock = None
+    if args.watch:
+        watch_lock = (args.root / "publisher.lock").open("w")
+        fcntl.flock(watch_lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
     api = authenticated_api(args.root)
     repo_id = initialize_repository(args.root, api)
     print(f"ModelScope repository: {repo_id}", flush=True)
