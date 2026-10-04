@@ -18,3 +18,9 @@
 | ModelScope | 私有仓库已创建，根 README 和阶段说明已同步 | [模型仓库](https://modelscope.cn/models/GaiWeiqi/SmallLLMPreTrain-English) |
 
 证据路径相对于远程 `/diff/gaiwq/llm_pretrain`。Tiny overfit 不衡量泛化，当前还没有通过聊天验收的模型。M1 与历史 loss 4.153138 的差异来自本次不同的抽样分片和运行栈，未使用历史验证集。99M 对照正在四卡执行；正式预训练、正式 SFT 和能力评测仍待完成。
+
+## 自动阶段进度
+
+| 阶段 | 状态 | 说明 |
+|---|---|---|
+| engineering-checks | complete | /diff/gaiwq/llm_pretrain/logs/engineering-checks.log |
