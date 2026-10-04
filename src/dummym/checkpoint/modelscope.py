@@ -69,7 +69,8 @@ def synchronize_docs(root: Path, repo_id: str, api: HubApi) -> None:
         allow_patterns=["*.md", "figures/*.png"],
         commit_message="Synchronize phase learning guides",
         disable_tqdm=True,
-        tracker_path=root / "cache/modelscope/docs-upload.json",
+        # 文档很小；禁用 SDK 的目录内追踪文件，避免污染源码树。
+        use_cache=False,
     )
 
 
