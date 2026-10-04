@@ -67,6 +67,6 @@
 | verify-compile | failed | /diff/gaiwq/llm_pretrain/logs/verify-compile.log |
 | compile-selection | fallback | Eager retained: RuntimeError |
 | m04_lr_pilot_0 | complete | /diff/gaiwq/llm_pretrain/logs/m04_lr_pilot_0.log |
-| m04_lr_pilot_1 | running | /diff/gaiwq/llm_pretrain/logs/m04_lr_pilot_1.log |
+| m04_lr_pilot_1 | complete | /diff/gaiwq/llm_pretrain/logs/m04_lr_pilot_1.log |
 | m04_lr_pilot_2 | running | /diff/gaiwq/llm_pretrain/logs/m04_lr_pilot_2.log |
 | m04_lr_pilot_3 | running | /diff/gaiwq/llm_pretrain/logs/m04_lr_pilot_3.log |
