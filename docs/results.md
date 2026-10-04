@@ -36,3 +36,5 @@
 | pilot-capacity-cosmopedia | complete | /diff/gaiwq/llm_pretrain/logs/pilot-capacity-cosmopedia.log |
 | pilot-capacity-tinystories | complete | /diff/gaiwq/llm_pretrain/logs/pilot-capacity-tinystories.log |
 | pilot-previous-attempt | retained | Incomplete packing preserved at /diff/gaiwq/llm_pretrain/data/failed/pilot100m-1791131011 |
+| full-data-background | running | /diff/gaiwq/llm_pretrain/logs/full-data.log |
+| reproduce-baselines | complete | /diff/gaiwq/llm_pretrain/logs/reproduce-baselines.log |
