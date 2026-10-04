@@ -26,3 +26,5 @@
 | engineering-checks | complete | /diff/gaiwq/llm_pretrain/logs/engineering-checks.log |
 | lint-checks | complete | /diff/gaiwq/llm_pretrain/logs/lint-checks.log |
 | format-checks | complete | /diff/gaiwq/llm_pretrain/logs/format-checks.log |
+| download-cosmopedia-pilot | running | /diff/gaiwq/llm_pretrain/logs/download-cosmopedia-pilot.log |
+| download-tinystories-pilot | complete | /diff/gaiwq/llm_pretrain/logs/download-tinystories-pilot.log |
