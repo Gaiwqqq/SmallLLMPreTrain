@@ -16,6 +16,7 @@
 | 四卡 FSDP2 教学对照 | FP32 SGD 更新差异 1.86e-9；Tensor 输出适配层通过 | runs/m03_fsdp/summary.json |
 | M1 39M 完整预训练 | 99,999,744 输入 token，3052 更新；验证 loss 10.472692 → 4.219103 | runs/m01_39m/summary.json |
 | ModelScope | 私有仓库已创建，根 README 和阶段说明已同步 | [模型仓库](https://modelscope.cn/models/GaiWeiqi/SmallLLMPreTrain-English) |
+| 真实 pilot 数据审计 | 300,000 文档指纹、分割及跨来源精确去重通过；Tokenizer 字符往返、特殊 ID 和 assistant mask 通过 | runs/pilot-audit.json |
 
 证据路径相对于远程 `/diff/gaiwq/llm_pretrain`。Tiny overfit 不衡量泛化，当前还没有通过聊天验收的模型。M1 与历史 loss 4.153138 的差异来自本次不同的抽样分片和运行栈，未使用历史验证集。六组 99M 对照已完成；正式预训练、正式 SFT 和能力评测仍待完成。
 
