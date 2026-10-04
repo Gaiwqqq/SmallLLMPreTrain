@@ -5,14 +5,52 @@ import hashlib
 import json
 import math
 from pathlib import Path
+import shutil
+import tempfile
 
 from datasets import load_dataset
 from accelerate import PartialState
 import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer, TrainerCallback
 from trl import SFTConfig, SFTTrainer
 
 from dummym.utils.files import write_json
+
+
+class ArchiveTrainerCheckpoint(TrainerCallback):
+    """在所有 rank 完成保存后，保留不受 Trainer 轮转删除影响的恢复快照。"""
+
+    def on_save(self, args, state, control, **kwargs):
+        if torch.distributed.is_initialized():
+            torch.distributed.barrier()
+        if not state.is_world_process_zero:
+            return control
+        milestones = Path(args.output_dir) / "trainer-milestones"
+        completed = [
+            json.loads(path.read_text())["step"] for path in milestones.glob("*/ready.json")
+        ]
+        previous = max(completed, default=0)
+        thresholds = [max(1, math.ceil(state.max_steps * ratio)) for ratio in (0.1, 0.25, 0.5, 1)]
+        if not any(previous < threshold <= state.global_step for threshold in thresholds):
+            return control
+        source = Path(args.output_dir) / f"checkpoint-{state.global_step}"
+        milestones.mkdir(exist_ok=True)
+        temporary = Path(tempfile.mkdtemp(prefix=".saving-", dir=milestones))
+        shutil.copytree(source, temporary, dirs_exist_ok=True)
+        destination = milestones / f"step-{state.global_step:06d}"
+        temporary.rename(destination)
+        write_json(
+            destination / "ready.json",
+            {
+                "format": "transformers-trainer",
+                "step": state.global_step,
+                "epoch": state.epoch,
+                "max_steps": state.max_steps,
+                "world_size": args.world_size,
+                "resume": "Trainer resume_from_checkpoint; preserve model, optimizer, scheduler and all rank RNG files",
+            },
+        )
+        return control
 
 
 def assert_assistant_mask(tokenizer) -> None:
@@ -133,6 +171,7 @@ def main() -> None:
         processing_class=tokenizer,
         train_dataset=split["train"],
         eval_dataset=split["test"],
+        callbacks=[ArchiveTrainerCheckpoint()] if not args.max_conversations else [],
     )
     result = trainer.train(resume_from_checkpoint=str(args.resume) if args.resume else None)
     trainer.save_model(str(args.output / "final"))

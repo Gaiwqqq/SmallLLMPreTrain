@@ -27,9 +27,13 @@ python -m torch.distributed.run --standalone --nproc_per_node=4 --no-python \
 
 LR=1e-5/3e-5/6e-5/1e-4 的独立单卡短跑后，按开发集选定四卡正式配置，最多两轮。训练与验证按整个会话划分、精确去重；最终测试不参与选择。监测 SFT loss 同时检查回复质量，不能只凭最低 loss 选择聊天助手。
 
+正式 SFT 在 Trainer 保存点跨过 10%/25%/50%/完成进度时，额外复制完整恢复目录到 `trainer-milestones/`。复制前等待所有 rank 保存 RNG，目录完成后最后写入 `ready.json`；ModelScope 上传器只处理该标记。因此 Trainer 删除旧 `checkpoint-*` 时不会删除待上传的恢复快照。保存采用 Trainer 原生格式，包含模型、optimizer、scheduler、trainer_state 和各 rank RNG；不要用教学 checkpoint.pt 的加载方式恢复它。短跑对照不重复归档这些大型恢复目录。
+
 ## 本次结果
 
 四卡 TRL 在 32 个合成会话上完成训练、验证与保存；最新复测使用 FP32 参数和 BF16 计算。正式聊天 SFT 将在 Base 模型导出后进行，目前没有聊天能力结论。 实测证据见 [运行记录](results.md)。
+
+`sft-interface-smoke-v4` 已验证完整恢复快照包含模型、optimizer、scheduler、trainer_state 和四份 RNG 文件；这是接口验收用的极小模型。
 
 ## 下一步
 

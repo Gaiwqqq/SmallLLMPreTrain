@@ -110,6 +110,45 @@ def upload_checkpoint(directory: Path, root: Path, repo_id: str, api: HubApi) ->
     print(f"uploaded checkpoint {relative}", flush=True)
 
 
+def upload_trainer_checkpoint(directory: Path, root: Path, repo_id: str, api: HubApi) -> None:
+    """TRL/Trainer 的完整恢复目录采用原生格式，不能伪装成教学 checkpoint.pt。"""
+    if (directory / "uploaded.json").exists():
+        return  # ready 之后目录不可变；Trainer 轮转只删除原始 checkpoint-*。
+    ready = json.loads((directory / "ready.json").read_text())
+    if ready["format"] != "transformers-trainer":
+        raise ValueError("Unsupported trainer checkpoint format")
+    relative = directory.relative_to(root / "runs").as_posix()
+    fingerprints = {
+        path.relative_to(directory).as_posix(): sha256_file(path)
+        for path in sorted(directory.rglob("*"))
+        if path.is_file()
+        and not path.name.startswith(".")
+        and path.name not in {"files.sha256.json", "README.md", "uploaded.json"}
+    }
+    write_json(directory / "files.sha256.json", fingerprints)
+    (directory / "README.md").write_text(
+        f"# {relative}\n\n"
+        f"TRL SFT 的完整 Trainer 恢复快照，更新数 {ready['step']}，"
+        f"epoch={ready['epoch']}，world_size={ready['world_size']}。\n\n"
+        "包含模型、optimizer、scheduler、trainer_state 和各 rank RNG；"
+        "使用 dummym-sft --resume 指向下载后的目录，并保持相同配置与数据。\n"
+        "SFT 采用动态会话长度，更新数不等于预训练的固定 token 预算。"
+        "本产物不代表通过聊天能力验收。\n"
+    )
+    api.upload_folder(
+        repo_id=repo_id,
+        repo_type="model",
+        folder_path=directory,
+        path_in_repo=f"checkpoints/{relative}",
+        ignore_patterns=["uploaded.json", ".ms_upload_cache*"],
+        commit_message=f"Archive complete SFT Trainer state at step {ready['step']}",
+        disable_tqdm=True,
+        max_workers=2,
+    )
+    write_json(directory / "uploaded.json", {"repo_id": repo_id, "path": relative})
+    print(f"uploaded Trainer checkpoint {relative}", flush=True)
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--root", type=Path, default=Path("/diff/gaiwq/llm_pretrain"))
@@ -166,6 +205,13 @@ def main() -> None:
                     raise RuntimeError(
                         "Checkpoint upload failed; retry after checking connectivity"
                     ) from None
+        for ready_path in sorted((args.root / "runs").glob("*/trainer-milestones/*/ready.json")):
+            try:
+                upload_trainer_checkpoint(ready_path.parent, args.root, repo_id, api)
+            except Exception as error:
+                print(f"Trainer upload failed: {type(error).__name__}", flush=True)
+                if not args.watch:
+                    raise RuntimeError("Trainer checkpoint upload failed") from None
         if not args.watch:
             break
         time.sleep(30)

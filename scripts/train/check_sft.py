@@ -101,6 +101,14 @@ def main():
     )
     if not (args.output / "trained/final/model.safetensors").exists():
         raise RuntimeError("SFT export is missing")
+    snapshots = list((args.output / "trained/trainer-milestones").glob("*/ready.json"))
+    if len(snapshots) != 1:
+        raise RuntimeError("SFT complete recovery snapshot is missing")
+    required = ["optimizer.pt", "scheduler.pt", "trainer_state.json", "model.safetensors"]
+    if any(not (snapshots[0].parent / name).exists() for name in required):
+        raise RuntimeError("SFT snapshot does not contain complete Trainer state")
+    if len(list(snapshots[0].parent.glob("rng_state_*.pth"))) != 4:
+        raise RuntimeError("SFT snapshot does not contain all four rank RNG states")
     write_json(
         args.output / "summary.json",
         {"status": "passed", "world_size": 4, "conversations": 32, "synthetic_data": True},
