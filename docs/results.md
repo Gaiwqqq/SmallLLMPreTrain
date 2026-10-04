@@ -30,8 +30,9 @@
 | download-tinystories-pilot | complete | /diff/gaiwq/llm_pretrain/logs/download-tinystories-pilot.log |
 | clean-pilot | complete | /diff/gaiwq/llm_pretrain/logs/clean-pilot.log |
 | train-tokenizer | complete | /diff/gaiwq/llm_pretrain/logs/train-tokenizer.log |
-| pack-pilot | failed | /diff/gaiwq/llm_pretrain/logs/pack-pilot.log |
+| pack-pilot | complete | /diff/gaiwq/llm_pretrain/logs/pack-pilot.log |
 | pipeline | failed | RuntimeError: pack-pilot failed with exit code 1 |
 | pilot-capacity-fineweb | complete | /diff/gaiwq/llm_pretrain/logs/pilot-capacity-fineweb.log |
 | pilot-capacity-cosmopedia | complete | /diff/gaiwq/llm_pretrain/logs/pilot-capacity-cosmopedia.log |
 | pilot-capacity-tinystories | complete | /diff/gaiwq/llm_pretrain/logs/pilot-capacity-tinystories.log |
+| pilot-previous-attempt | retained | Incomplete packing preserved at /diff/gaiwq/llm_pretrain/data/failed/pilot100m-1791131011 |
