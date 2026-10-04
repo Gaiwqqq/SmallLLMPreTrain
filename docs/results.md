@@ -28,3 +28,4 @@
 | format-checks | complete | /diff/gaiwq/llm_pretrain/logs/format-checks.log |
 | download-cosmopedia-pilot | complete | /diff/gaiwq/llm_pretrain/logs/download-cosmopedia-pilot.log |
 | download-tinystories-pilot | complete | /diff/gaiwq/llm_pretrain/logs/download-tinystories-pilot.log |
+| clean-pilot | complete | /diff/gaiwq/llm_pretrain/logs/clean-pilot.log |
