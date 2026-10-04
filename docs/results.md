@@ -42,3 +42,4 @@
 | verify-trl-sft | complete | /diff/gaiwq/llm_pretrain/logs/verify-trl-sft.log |
 | verify-four-gpu-ddp | complete | /diff/gaiwq/llm_pretrain/logs/verify-four-gpu-ddp.log |
 | verify-fsdp2 | complete | /diff/gaiwq/llm_pretrain/logs/verify-fsdp2.log |
+| benchmark-single | complete | /diff/gaiwq/llm_pretrain/logs/benchmark-single.log |
