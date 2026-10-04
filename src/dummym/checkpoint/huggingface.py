@@ -49,6 +49,18 @@ def export(checkpoint_path: Path, tokenizer_dir: Path, output: Path) -> dict:
         "progress": checkpoint.get("progress", {}),
     }
     write_json(output / "export.json", report)
+    (output / "README.md").write_text(
+        "# SmallLLMPreTrain English Base\n\n"
+        "本模型从随机权重预训练，属于文本续写模型；没有通过聊天能力验收。\n\n"
+        f"- 实际参数：{reference.num_parameters():,}\n"
+        f"- 上下文：{reference.config.max_position_embeddings}\n"
+        f"- 已训练输入 token：{report['progress'].get('tokens_seen', 'unknown')}\n"
+        f"- 验证 loss：{report['progress'].get('validation_loss', 'unknown')}\n"
+        "- 语料：FineWeb-Edu、Cosmopedia-v2、TinyStories；来源与许可见学习仓库文档。\n"
+        "- Tokenizer：自训 32K byte-level BPE。\n\n"
+        "标准 Transformers 加载不需要 trust_remote_code；导出时对照 FP32 logits 与 loss。\n"
+        "导出一致性见 export.json；知识错误、复读和指令不遵循仍需独立评测。\n"
+    )
     return report
 
 

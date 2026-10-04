@@ -27,12 +27,16 @@ def train_tokenizer(files: list[Path], output: Path, max_documents: int = 100_00
 
     def documents():
         for path in files:
+            source_documents = 0
             with path.open() as stream:
                 for line in stream:
                     if counts["documents"] >= max_documents:
                         return
+                    if source_documents >= max(1, max_documents // len(files)):
+                        break
                     text = json.loads(line)["text"]
                     counts["documents"] += 1
+                    source_documents += 1
                     yield text
 
     tokenizer = Tokenizer(models.BPE(unk_token="<unk>"))

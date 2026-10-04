@@ -16,13 +16,7 @@ def test_rope_preserves_vector_norm() -> None:
     rope = RotaryEmbedding(head_dim=8)
     cos, sin = rope(position_ids, dtype=query.dtype)
 
-    rotated_query, rotated_key = apply_rotary_position_embeddings(
-        query, key, cos, sin
-    )
+    rotated_query, rotated_key = apply_rotary_position_embeddings(query, key, cos, sin)
 
-    torch.testing.assert_close(
-        rotated_query.norm(dim=-1), query.norm(dim=-1), rtol=1e-5, atol=1e-6
-    )
-    torch.testing.assert_close(
-        rotated_key.norm(dim=-1), key.norm(dim=-1), rtol=1e-5, atol=1e-6
-    )
+    torch.testing.assert_close(rotated_query.norm(dim=-1), query.norm(dim=-1), rtol=1e-5, atol=1e-6)
+    torch.testing.assert_close(rotated_key.norm(dim=-1), key.norm(dim=-1), rtol=1e-5, atol=1e-6)

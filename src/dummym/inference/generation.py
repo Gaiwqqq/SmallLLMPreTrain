@@ -96,9 +96,7 @@ def generate_token_ids(
                 # Shift right so the first token that crosses the threshold is
                 # retained. This also keeps one candidate for tiny top_p values.
                 sorted_indices_to_remove = cumulative_probabilities > top_p
-                sorted_indices_to_remove[..., 1:] = (
-                    sorted_indices_to_remove[..., :-1].clone()
-                )
+                sorted_indices_to_remove[..., 1:] = sorted_indices_to_remove[..., :-1].clone()
                 sorted_indices_to_remove[..., 0] = False
                 sorted_logits = sorted_logits.masked_fill(
                     sorted_indices_to_remove,

@@ -34,6 +34,15 @@ ssh -N -o ExitOnForwardFailure=yes -o ServerAliveInterval=30 \
 
 故障排查：连接拒绝检查反向隧道；CUDA 不可用检查是否使用 envs/train/bin/python；环境冲突使用隔离环境，禁止修改其他项目环境。
 
+首周自动执行入口：
+
+```bash
+nohup python scripts/remote/week.py > "$PRETRAIN_ROOT/logs/week.log" 2>&1 < /dev/null &
+nohup dummym-publish --docs --watch > "$PRETRAIN_ROOT/logs/modelscope.log" 2>&1 < /dev/null &
+```
+
+`workflow.json` 记录阶段、PID、命令和状态；`docs/results.md` 随阶段同步。执行器加文件锁，避免重复启动。重启时跳过完成阶段，训练从完整 checkpoint 恢复；数据/Tokenizer 若留下不完整目录，先审阅日志并保留失败目录再重做。推理与辅助评测分别使用 envs/inference、envs/evaluation。
+
 ## 本次结果
 
 待本次运行验证；历史实验结果不视为本次结果。实测状态见 [运行记录](results.md)。

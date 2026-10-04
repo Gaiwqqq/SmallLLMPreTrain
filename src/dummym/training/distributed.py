@@ -39,5 +39,8 @@ def initialize(device_type: str = "cuda") -> ProcessContext:
     if device.type == "cuda":
         torch.cuda.set_device(device)
     if world_size > 1:
-        dist.init_process_group(backend="nccl" if device.type == "cuda" else "gloo")
+        dist.init_process_group(
+            backend="nccl" if device.type == "cuda" else "gloo",
+            device_id=device if device.type == "cuda" else None,
+        )
     return ProcessContext(rank, world_size, device)

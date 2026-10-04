@@ -12,9 +12,7 @@ def test_rms_norm_matches_reference() -> None:
     norm.weight.data.uniform_(0.5, 1.5)
 
     actual = norm(hidden_states)
-    expected = hidden_states * torch.rsqrt(
-        hidden_states.square().mean(dim=-1, keepdim=True) + 1e-5
-    )
+    expected = hidden_states * torch.rsqrt(hidden_states.square().mean(dim=-1, keepdim=True) + 1e-5)
     expected = expected * norm.weight
 
     torch.testing.assert_close(actual, expected)

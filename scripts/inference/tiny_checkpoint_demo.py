@@ -26,9 +26,7 @@ from scripts.train.tiny_overfit import (  # noqa: E402
 )
 
 
-DEFAULT_CHECKPOINT = (
-    PROJECT_ROOT / "runs" / "m00_tiny_overfit" / "checkpoint.pt"
-)
+DEFAULT_CHECKPOINT = PROJECT_ROOT / "runs" / "m00_tiny_overfit" / "checkpoint.pt"
 
 
 def parse_args() -> argparse.Namespace:
@@ -58,9 +56,7 @@ def parse_args() -> argparse.Namespace:
 
 def resolve_device(requested: str) -> torch.device:
     if requested == "auto":
-        return torch.device(
-            "cuda" if torch.cuda.is_available() else "cpu"
-        )
+        return torch.device("cuda" if torch.cuda.is_available() else "cpu")
     if requested == "cuda" and not torch.cuda.is_available():
         raise RuntimeError("CUDA was requested but is unavailable")
     return torch.device(requested)
@@ -71,9 +67,7 @@ def main() -> None:
     device = resolve_device(args.device)
 
     if not args.checkpoint.is_file():
-        raise FileNotFoundError(
-            f"checkpoint not found: {args.checkpoint}"
-        )
+        raise FileNotFoundError(f"checkpoint not found: {args.checkpoint}")
 
     # 只加载自己生成、来源可信的 .pt 文件。
     checkpoint = torch.load(
@@ -83,9 +77,7 @@ def main() -> None:
     )
 
     # 使用 checkpoint 中保存的模型配置重建模型。
-    config = MiniLlamaConfig.from_dict(
-        checkpoint["model_config"]
-    )
+    config = MiniLlamaConfig.from_dict(checkpoint["model_config"])
     model = MiniLlamaForCausalLM(config)
 
     # strict=True 保证没有缺少、多出或名称不匹配的参数。
@@ -142,16 +134,11 @@ def main() -> None:
     print(f"documents: {document_count}")
 
     if evaluated_loss > args.max_loss:
-        raise RuntimeError(
-            f"loss check failed: "
-            f"{evaluated_loss:.6f} > {args.max_loss:.6f}"
-        )
+        raise RuntimeError(f"loss check failed: {evaluated_loss:.6f} > {args.max_loss:.6f}")
 
     if evaluated_accuracy < args.min_accuracy:
         raise RuntimeError(
-            f"accuracy check failed: "
-            f"{evaluated_accuracy:.4f} < "
-            f"{args.min_accuracy:.4f}"
+            f"accuracy check failed: {evaluated_accuracy:.4f} < {args.min_accuracy:.4f}"
         )
 
     # 第二项测试：使用训练语料的前缀执行贪心生成。
@@ -179,9 +166,7 @@ def main() -> None:
         eos_token_id=config.eos_token_id,
     )
 
-    new_token_ids = generated_ids[
-        0, len(prompt_ids):
-    ].tolist()
+    new_token_ids = generated_ids[0, len(prompt_ids) :].tolist()
 
     generated_text = tokenizer.decode(
         new_token_ids,

@@ -28,6 +28,8 @@ python -m torch.distributed.run --standalone --nproc_per_node=4 --no-python \
 
 吞吐按所有 rank 的实际 token 和同步墙钟时间计算。比较 micro-batch=4/8/16/32/64；global batch 固定为 256。torch.compile 正确性通过且稳态吞吐至少提高 10% 才启用。小模型单卡可放下，DDP 是正式路线；FSDP2 对照用于理解分片的通信与显存代价。
 
+FSDP2 对照见 `scripts/train/verify_fsdp.py`。教学模型返回 dataclass；分片反向钩子需要可遍历的 Tensor 输出，因此这里用显式 LossModel 适配层返回 loss Tensor。此适配不修改模型数学，也不改变原单卡/DDP 接口。
+
 ## 本次结果
 
 待本次运行验证；历史实验结果不视为本次结果。实测状态见 [运行记录](results.md)。

@@ -1,10 +1,14 @@
 """TRL 全参数 SFT：只监督 assistant 内容，原模型仍从随机权重预训练。"""
 
 import argparse
+import hashlib
 import json
+import math
 from pathlib import Path
 
 from datasets import load_dataset
+from accelerate import PartialState
+import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from trl import SFTConfig, SFTTrainer
 
@@ -37,8 +41,20 @@ def main() -> None:
     parser.add_argument("--learning-rate", type=float, default=3e-5)
     parser.add_argument("--epochs", type=float, default=2)
     parser.add_argument("--batch-size", type=int, default=8)
+    parser.add_argument(
+        "--max-conversations", type=int, default=0, help="SFT 对照短跑规模，0 使用全部"
+    )
     parser.add_argument("--resume", type=Path)
     args = parser.parse_args()
+    if (
+        not math.isfinite(args.learning_rate)
+        or args.learning_rate <= 0
+        or not math.isfinite(args.epochs)
+        or args.epochs <= 0
+    ):
+        parser.error("Learning rate and epochs must be positive and finite")
+    if args.batch_size <= 0 or args.max_conversations < 0:
+        parser.error("Invalid batch size or conversation limit")
     if args.output.exists() and args.resume is None:
         raise FileExistsError(args.output)
     tokenizer = AutoTokenizer.from_pretrained(args.model, local_files_only=True)
@@ -49,27 +65,30 @@ def main() -> None:
     files = [
         str(args.data_dir / item["path"]) for item in manifest["files"] if "/train-" in item["path"]
     ]
-    dataset = load_dataset("parquet", data_files=files, split="train")
     # 按整个会话去重，不将同一会话的不同轮次拆到两个 split。
     seen = set()
 
     def unique(example):
-        digest = (
-            __import__("hashlib")
-            .sha256(json.dumps(example["messages"], sort_keys=True).encode())
-            .hexdigest()
-        )
+        digest = hashlib.sha256(
+            json.dumps(example["messages"], sort_keys=True).encode()
+        ).hexdigest()
         if digest in seen:
             return False
         seen.add(digest)
         return True
 
-    dataset = dataset.filter(unique, load_from_cache_file=False)
+    with PartialState().main_process_first():
+        dataset = load_dataset("parquet", data_files=files, split="train")
+        dataset = dataset.filter(unique, load_from_cache_file=True)
     split = dataset.train_test_split(test_size=0.01, seed=2026)
+    if args.max_conversations:
+        split["train"] = split["train"].select(
+            range(min(args.max_conversations, len(split["train"])))
+        )
     model = AutoModelForCausalLM.from_pretrained(
         args.model,
         local_files_only=True,
-        torch_dtype=__import__("torch").bfloat16,
+        dtype=torch.bfloat16,
         attn_implementation="sdpa",
     )
     model.config.use_cache = False
@@ -108,6 +127,7 @@ def main() -> None:
     )
     result = trainer.train(resume_from_checkpoint=str(args.resume) if args.resume else None)
     trainer.save_model(str(args.output / "final"))
+    validation_metrics = trainer.evaluate()
     if trainer.is_world_process_zero():
         tokenizer.save_pretrained(args.output / "final")
         write_json(
@@ -119,5 +139,9 @@ def main() -> None:
                 "validation_conversations": len(split["test"]),
                 "source_revision": manifest["revision"],
                 "learning_rate": args.learning_rate,
+                "validation_loss": validation_metrics["eval_loss"],
             },
         )
+    if torch.distributed.is_initialized():
+        torch.distributed.barrier()
+        torch.distributed.destroy_process_group()

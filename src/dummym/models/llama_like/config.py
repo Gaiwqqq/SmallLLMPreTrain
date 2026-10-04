@@ -45,13 +45,9 @@ class MiniLlamaConfig:
                 raise ValueError(f"{field_name} must be positive")
 
         if self.hidden_size % self.num_attention_heads != 0:
-            raise ValueError(
-                "hidden_size must be divisible by num_attention_heads"
-            )
+            raise ValueError("hidden_size must be divisible by num_attention_heads")
         if self.num_attention_heads % self.num_key_value_heads != 0:
-            raise ValueError(
-                "num_attention_heads must be divisible by num_key_value_heads"
-            )
+            raise ValueError("num_attention_heads must be divisible by num_key_value_heads")
         if self.head_dim % 2 != 0:
             raise ValueError("RoPE requires an even attention head dimension")
         if not 0.0 <= self.attention_dropout < 1.0:

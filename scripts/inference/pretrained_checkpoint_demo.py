@@ -150,9 +150,7 @@ def load_checkpoint(path: Path) -> dict[str, Any]:
     required = {"model_config", "model_state_dict"}
     missing = sorted(required - checkpoint.keys())
     if missing:
-        raise ValueError(
-            "checkpoint 缺少通用推理字段：" + ", ".join(missing)
-        )
+        raise ValueError("checkpoint 缺少通用推理字段：" + ", ".join(missing))
     return checkpoint
 
 
@@ -167,9 +165,7 @@ def resolve_tokenizer_path(
     else:
         saved_path = checkpoint.get("tokenizer_path")
         if not saved_path:
-            raise ValueError(
-                "checkpoint 没有 tokenizer_path，请通过 --tokenizer 显式指定"
-            )
+            raise ValueError("checkpoint 没有 tokenizer_path，请通过 --tokenizer 显式指定")
         path = Path(saved_path)
 
     if not path.is_file():
@@ -245,7 +241,7 @@ def main() -> None:
         generator=generator,
     )
 
-    new_token_ids = all_token_ids[0, len(prompt_ids):].tolist()
+    new_token_ids = all_token_ids[0, len(prompt_ids) :].tolist()
     generated_text = tokenizer.decode(
         new_token_ids,
         skip_special_tokens=False,

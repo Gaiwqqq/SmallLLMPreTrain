@@ -91,9 +91,7 @@ class GroupedQueryAttention(nn.Module):
     ) -> torch.Tensor:
         batch_size, sequence_length, _ = hidden_states.shape
 
-        query = self._shape(
-            self.q_proj(hidden_states), self.num_attention_heads
-        )
+        query = self._shape(self.q_proj(hidden_states), self.num_attention_heads)
         key = self._shape(self.k_proj(hidden_states), self.num_key_value_heads)
         value = self._shape(self.v_proj(hidden_states), self.num_key_value_heads)
 
@@ -107,9 +105,7 @@ class GroupedQueryAttention(nn.Module):
         is_causal = attention_mask is None
         if attention_mask is not None:
             if attention_mask.shape != (batch_size, sequence_length):
-                raise ValueError(
-                    "attention_mask must have shape [batch_size, sequence_length]"
-                )
+                raise ValueError("attention_mask must have shape [batch_size, sequence_length]")
             causal_mask = torch.ones(
                 (sequence_length, sequence_length),
                 device=hidden_states.device,
@@ -126,9 +122,13 @@ class GroupedQueryAttention(nn.Module):
             dropout_p=self.attention_dropout if self.training else 0.0,
             is_causal=is_causal,
         )
-        attention_output = attention_output.transpose(1, 2).contiguous().view(
-            batch_size,
-            sequence_length,
-            self.hidden_size,
+        attention_output = (
+            attention_output.transpose(1, 2)
+            .contiguous()
+            .view(
+                batch_size,
+                sequence_length,
+                self.hidden_size,
+            )
         )
         return self.o_proj(attention_output)

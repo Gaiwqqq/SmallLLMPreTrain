@@ -1,0 +1,10 @@
+{
+  "chat_dev.jsonl": {
+    "sha256": "f9fb4cfb59482cc498c442704b3752a56ecdb825363410d53eae527e3dc2366f",
+    "cases": 40
+  },
+  "chat_test.jsonl": {
+    "sha256": "6cf4b686479cba5d9f12a85be9aecacab2104d27343ecfc74e8dca273833810f",
+    "cases": 120
+  }
+}

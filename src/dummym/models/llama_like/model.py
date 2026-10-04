@@ -78,9 +78,7 @@ class TransformerBlock(nn.Module):
         self.self_attn = GroupedQueryAttention(config)
 
         # MLP 子层之前的第二个 RMSNorm。
-        self.post_attention_layernorm = RMSNorm(
-            config.hidden_size, config.rms_norm_eps
-        )
+        self.post_attention_layernorm = RMSNorm(config.hidden_size, config.rms_norm_eps)
 
         # SwiGLU 前馈网络：silu(gate_proj(x)) * up_proj(x)，再经 down_proj
         # 投影回 hidden size，因此其输入输出也都是 [B, T, D]。
@@ -224,9 +222,7 @@ class MiniLlamaForCausalLM(nn.Module):
 
         parameters = self.parameters()
         if trainable_only:
-            parameters = (
-                parameter for parameter in parameters if parameter.requires_grad
-            )
+            parameters = (parameter for parameter in parameters if parameter.requires_grad)
 
         # numel() 返回每个 Parameter 包含的标量个数。
         return sum(parameter.numel() for parameter in parameters)
@@ -270,11 +266,15 @@ class MiniLlamaForCausalLM(nn.Module):
         if position_ids is None:
             # arange 先得到 [T]，unsqueeze 后为 [1, T]，expand 得到 [B, T]。
             # expand 通常只创建广播视图，不为每个 batch 复制一份位置数组。
-            position_ids = torch.arange(
-                sequence_length,
-                device=input_ids.device,
-                dtype=torch.long,
-            ).unsqueeze(0).expand(batch_size, -1)
+            position_ids = (
+                torch.arange(
+                    sequence_length,
+                    device=input_ids.device,
+                    dtype=torch.long,
+                )
+                .unsqueeze(0)
+                .expand(batch_size, -1)
+            )
         elif position_ids.shape != input_ids.shape:
             raise ValueError("position_ids must have the same shape as input_ids")
 

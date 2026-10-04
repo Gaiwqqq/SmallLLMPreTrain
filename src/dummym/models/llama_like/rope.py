@@ -15,11 +15,7 @@ class RotaryEmbedding(nn.Module):
             raise ValueError("RoPE head_dim must be even")
 
         inv_freq = 1.0 / (
-            theta
-            ** (
-                torch.arange(0, head_dim, 2, dtype=torch.float32)
-                / float(head_dim)
-            )
+            theta ** (torch.arange(0, head_dim, 2, dtype=torch.float32) / float(head_dim))
         )
         self.register_buffer("inv_freq", inv_freq, persistent=False)
 
@@ -29,9 +25,7 @@ class RotaryEmbedding(nn.Module):
         *,
         dtype: torch.dtype,
     ) -> tuple[torch.Tensor, torch.Tensor]:
-        frequencies = torch.einsum(
-            "bt,d->btd", position_ids.float(), self.inv_freq.float()
-        )
+        frequencies = torch.einsum("bt,d->btd", position_ids.float(), self.inv_freq.float())
         embeddings = torch.cat((frequencies, frequencies), dim=-1)
         cos = embeddings.cos().to(dtype=dtype).unsqueeze(1)
         sin = embeddings.sin().to(dtype=dtype).unsqueeze(1)

@@ -19,7 +19,7 @@ def main() -> None:
         AutoModelForCausalLM.from_pretrained(
             args.model,
             local_files_only=True,
-            torch_dtype=torch.bfloat16 if args.device.startswith("cuda") else torch.float32,
+            dtype=torch.bfloat16 if args.device.startswith("cuda") else torch.float32,
         )
         .to(args.device)
         .eval()

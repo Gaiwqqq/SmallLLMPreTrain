@@ -23,7 +23,9 @@ spec.loader.exec_module(prepare)
 
 
 def test_normalization_preserves_paragraphs_and_rejects_bad_text():
-    text, reason = prepare.normalize_text("  Cafe\u0301\tlesson\r\n\r\n\r\n Second paragraph  ", 1, 200)
+    text, reason = prepare.normalize_text(
+        "  Cafe\u0301\tlesson\r\n\r\n\r\n Second paragraph  ", 1, 200
+    )
     assert reason is None
     assert text == "Café lesson\n\nSecond paragraph"
     assert prepare.normalize_text(None, 1, 200)[1] == "not_text"
@@ -42,7 +44,16 @@ def test_packing_keeps_eos_and_stream_order_without_repeating_or_padding():
     assert train.add([12, 13, 14, 15, 16, 2]) == 5  # 预算向下对齐到 8。
     assert train.full
     assert train.add([99, 2]) == 0
-    assert np.frombuffer(train_file.getvalue(), dtype="<u2").tolist() == [10, 11, 2, 12, 13, 14, 15, 16]
+    assert np.frombuffer(train_file.getvalue(), dtype="<u2").tolist() == [
+        10,
+        11,
+        2,
+        12,
+        13,
+        14,
+        15,
+        16,
+    ]
     assert np.frombuffer(validation_file.getvalue(), dtype="<u2").tolist() == [20, 21, 22, 2]
     assert train.stats()["truncated_tokens_at_budget"] == 1
 
@@ -51,14 +62,23 @@ def test_packing_keeps_eos_and_stream_order_without_repeating_or_padding():
 def corpus(tmp_path):
     root = tmp_path / "raw"
     # 两个抓取批次包含完全相同的正文，只有尾部空白不同，必须被规范化后去重。
-    texts = [f"English educational article number {index} discusses science and learning. " * 4
-             for index in range(60)]
+    texts = [
+        f"English educational article number {index} discusses science and learning. " * 4
+        for index in range(60)
+    ]
     for dump in ("CC-MAIN-2013-20", "CC-MAIN-2014-10"):
         directory = root / "data" / dump
         directory.mkdir(parents=True)
-        pq.write_table(pa.table({"text": [text + "\n " for text in texts],
-                                 "id": [str(index) for index in range(60)]}),
-                       directory / "part.parquet", row_group_size=5)
+        pq.write_table(
+            pa.table(
+                {
+                    "text": [text + "\n " for text in texts],
+                    "id": [str(index) for index in range(60)],
+                }
+            ),
+            directory / "part.parquet",
+            row_group_size=5,
+        )
     vocab = {"<unk>": 0, "<s>": 1, "</s>": 2}
     vocab.update({f"word{index}": index + 3 for index in range(31_997)})
     tokenizer = Tokenizer(models.WordLevel(vocab, unk_token="<unk>"))
@@ -70,10 +90,29 @@ def corpus(tmp_path):
 
 def run_prepare(monkeypatch, corpus, output, tokens=512):
     root, tokenizer = corpus
-    monkeypatch.setattr(sys, "argv", [str(SCRIPT), "--input-dir", str(root),
-                        "--tokenizer", str(tokenizer), "--output-dir", str(output),
-                        "--train-tokens", str(tokens), "--validation-tokens", str(tokens),
-                        "--sequence-length", "16", "--validation-fraction", "0.5", "--batch-size", "4"])
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            str(SCRIPT),
+            "--input-dir",
+            str(root),
+            "--tokenizer",
+            str(tokenizer),
+            "--output-dir",
+            str(output),
+            "--train-tokens",
+            str(tokens),
+            "--validation-tokens",
+            str(tokens),
+            "--sequence-length",
+            "16",
+            "--validation-fraction",
+            "0.5",
+            "--batch-size",
+            "4",
+        ],
+    )
     prepare.main()
 
 

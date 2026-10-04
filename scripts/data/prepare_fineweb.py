@@ -66,21 +66,35 @@ EXTRA_NEWLINES = re.compile(r"\n{3,}")
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--input-dir", type=Path, default="/diff/workspace/wyl/data/fineweb-edu",
-                        help="已下载的 fineweb-edu 仓库根目录，内含 data/CC-MAIN-*/*.parquet")
-    parser.add_argument("--tokenizer", type=Path, default="/diff/models/mistralai/Mistral-7B-v0.1/tokenizer.json",
-                        help="本地 Mistral-7B-v0.1/tokenizer.json")
-    parser.add_argument("--output-dir", type=Path,
-                        default=PROJECT_ROOT / "data/tokenized/m01_fineweb_100m")
+    parser.add_argument(
+        "--input-dir",
+        type=Path,
+        default="/diff/workspace/wyl/data/fineweb-edu",
+        help="已下载的 fineweb-edu 仓库根目录，内含 data/CC-MAIN-*/*.parquet",
+    )
+    parser.add_argument(
+        "--tokenizer",
+        type=Path,
+        default="/diff/models/mistralai/Mistral-7B-v0.1/tokenizer.json",
+        help="本地 Mistral-7B-v0.1/tokenizer.json",
+    )
+    parser.add_argument(
+        "--output-dir", type=Path, default=PROJECT_ROOT / "data/tokenized/m01_fineweb_100m"
+    )
     parser.add_argument("--train-tokens", type=int, default=100_000_000)
     parser.add_argument("--validation-tokens", type=int, default=1_000_000)
     parser.add_argument("--sequence-length", type=int, default=2048)
-    parser.add_argument("--validation-fraction", type=float, default=0.01,
-                        help="文档被划为验证集的概率；不是精确的 token 比例")
+    parser.add_argument(
+        "--validation-fraction",
+        type=float,
+        default=0.01,
+        help="文档被划为验证集的概率；不是精确的 token 比例",
+    )
     parser.add_argument("--min-chars", type=int, default=200)
     parser.add_argument("--max-chars", type=int, default=100_000)
-    parser.add_argument("--batch-size", type=int, default=128,
-                        help="每次从一个抓取批次读取并编码的文档数")
+    parser.add_argument(
+        "--batch-size", type=int, default=128, help="每次从一个抓取批次读取并编码的文档数"
+    )
     parser.add_argument("--seed", type=int, default=2026)
     parser.add_argument("--log-every", type=int, default=50, help="每多少个读取 batch 打印进度")
     args = parser.parse_args()
@@ -169,8 +183,7 @@ def split_document(digest: bytes, seed: int, validation_fraction: float) -> str:
     return "validation" if fraction < validation_fraction else "train"
 
 
-def iter_dump_batches(paths: list[Path], root: Path, seed: str, batch_size: int,
-                      sources: dict):
+def iter_dump_batches(paths: list[Path], root: Path, seed: str, batch_size: int, sources: dict):
     """逐个打开同一抓取批次的分片；打乱分片、row group 和 batch 内文档顺序。
 
     Parquet 的 row group 可以独立读取，因此不用从每个大文件的开头顺序扫描。
@@ -202,7 +215,8 @@ def iter_dump_batches(paths: list[Path], root: Path, seed: str, batch_size: int,
                 # 是否变动。只读元数据，不为几个 GB 的分片再计算一遍全文哈希。
                 stat = path.stat()
                 sources[relative] = {
-                    "bytes": stat.st_size, "mtime_ns": stat.st_mtime_ns,
+                    "bytes": stat.st_size,
+                    "mtime_ns": stat.st_mtime_ns,
                     "rows_in_file": parquet.metadata.num_rows,
                     "row_groups": parquet.num_row_groups,
                 }
@@ -211,8 +225,9 @@ def iter_dump_batches(paths: list[Path], root: Path, seed: str, batch_size: int,
                 # Parquet 是列式格式，指定 columns 可以不读取质量分数等未使用的列。
                 # use_threads=False 关闭 Arrow 的多线程解码；tokenizer 会单独并行。
                 columns = [name for name in ("text", "id", "url") if name in schema.names]
-                for batch in parquet.iter_batches(batch_size=batch_size, columns=columns,
-                                                  row_groups=groups, use_threads=False):
+                for batch in parquet.iter_batches(
+                    batch_size=batch_size, columns=columns, row_groups=groups, use_threads=False
+                ):
                     # 仅把当前 batch 转为 Python 字典列表，不把整个文件搬进内存。
                     rows = batch.to_pylist()
                     rng.shuffle(rows)
@@ -221,8 +236,7 @@ def iter_dump_batches(paths: list[Path], root: Path, seed: str, batch_size: int,
             raise RuntimeError(f"读取 Parquet 失败：{path}") from exc
 
 
-def iter_sample_batches(files: list[Path], root: Path, seed: int, batch_size: int,
-                        sources: dict):
+def iter_sample_batches(files: list[Path], root: Path, seed: int, batch_size: int, sources: dict):
     """在已有 CC-MAIN 批次之间轮询，避免只用最早一个分片就填满预算。
 
     每个抓取批次同时只打开一个分片；当前十个批次最多对应十个读取器。
@@ -238,8 +252,10 @@ def iter_sample_batches(files: list[Path], root: Path, seed: int, batch_size: in
     random.Random(seed).shuffle(dumps)
     # deque 是两端都能高效插入/弹出的队列。队列里放的是尚未读完的生成器，
     # 创建生成器本身不会立刻读取文件；各批次还带有独立且可复现的派生种子。
-    readers = deque(iter_dump_batches(by_dump[dump], root, f"{seed}:{dump}", batch_size, sources)
-                    for dump in dumps)
+    readers = deque(
+        iter_dump_batches(by_dump[dump], root, f"{seed}:{dump}", batch_size, sources)
+        for dump in dumps
+    )
     try:
         while readers:
             reader = readers.popleft()
@@ -383,9 +399,15 @@ def main() -> None:
         # 两个 writer 拥有各自的 token 预算和 pending，训练文档的尾巴不可能被
         # 拼到验证文档前面。若先统一 packing 再切 split，就无法保证这一点。
         writers = {
-            split: PackedWriter(stack.enter_context((output / f"{split}.bin").open("wb")),
-                                budget, args.sequence_length)
-            for split, budget in (("train", args.train_tokens), ("validation", args.validation_tokens))
+            split: PackedWriter(
+                stack.enter_context((output / f"{split}.bin").open("wb")),
+                budget,
+                args.sequence_length,
+            )
+            for split, budget in (
+                ("train", args.train_tokens),
+                ("validation", args.validation_tokens),
+            )
         }
         documents = stack.enter_context((output / "documents.jsonl").open("w", encoding="utf-8"))
         previews = stack.enter_context((output / "preview.jsonl").open("w", encoding="utf-8"))
@@ -422,7 +444,9 @@ def main() -> None:
             # add_special_tokens=False 跳过 tokenizer 后处理器自动插入的 BOS/EOS；
             # 这并不禁止正文中的特殊 token 字面串被识别。下文只显式追加一个 EOS。
             # encode_batch 保持输入顺序，所以可以用 zip 将每个编码结果配回原文档。
-            encodings = tokenizer.encode_batch([item[0] for item in candidates], add_special_tokens=False)
+            encodings = tokenizer.encode_batch(
+                [item[0] for item in candidates], add_special_tokens=False
+            )
             for (text, digest, split, row), encoding in zip(candidates, encodings):
                 writer = writers[split]
                 # 第二次检查不是重复工作：同一 batch 的早先文档可能刚好填满预算，
@@ -436,9 +460,15 @@ def main() -> None:
                 offset = writer.written_tokens + len(writer.pending)
                 used = writer.add(ids)
                 record = {
-                    "split": split, "sha256": digest.hex(), "source": source,
-                    "id": row.get("id"), "url": row.get("url"), "characters": len(text),
-                    "encoded_tokens_with_eos": len(ids), "used_tokens": used, "token_offset": offset,
+                    "split": split,
+                    "sha256": digest.hex(),
+                    "source": source,
+                    "id": row.get("id"),
+                    "url": row.get("url"),
+                    "characters": len(text),
+                    "encoded_tokens_with_eos": len(ids),
+                    "used_tokens": used,
+                    "token_offset": offset,
                 }
                 # encoded_tokens_with_eos 是原文完整编码长度；used_tokens 是预算内接收
                 # 的长度。最后一篇可能只用前半段，二者不能混着统计实际训练数据量。
@@ -452,10 +482,13 @@ def main() -> None:
                     write_json_line(previews, {**record, "text_preview": text[:1200]})
                     preview_counts[split] += 1
             if batch_index % args.log_every == 0:
-                print(f"batches={batch_index} scanned={counts['scanned_documents']:,} "
-                      f"train={writers['train'].written_tokens:,}/{writers['train'].target_tokens:,} "
-                      f"validation={writers['validation'].written_tokens:,}/"
-                      f"{writers['validation'].target_tokens:,}", flush=True)
+                print(
+                    f"batches={batch_index} scanned={counts['scanned_documents']:,} "
+                    f"train={writers['train'].written_tokens:,}/{writers['train'].target_tokens:,} "
+                    f"validation={writers['validation'].written_tokens:,}/"
+                    f"{writers['validation'].target_tokens:,}",
+                    flush=True,
+                )
             # 训练集和验证集的 token 预算都满足才停止；哈希划分的文档长度不同，
             # 即使文档比例接近预设值，两边也不一定在同一个读取 batch 内达到目标。
             if all(writer.full for writer in writers.values()):
@@ -474,27 +507,53 @@ def main() -> None:
     # tokenizer 的 SHA-256 则针对本次实际使用的副本，便于训练时核对词表是否一致。
     summary = {
         "status": "complete" if complete else "insufficient_data",
-        "source": {"repo_id": "HuggingFaceFW/fineweb-edu", "license_in_dataset_card": "odc-by",
-                   "input_dir": str(root), "discovered_files": len(files),
-                   "sampling": "seeded per-dump round-robin; shuffled files, row groups and batches",
-                   "files_read": sources, "selected_by_source": selected_by_source},
-        "parameters": {key: str(value) if isinstance(value, Path) else value
-                       for key, value in vars(args).items()},
-        "tokenizer": {"source_path": str(args.tokenizer.resolve()), "file": "tokenizer.json",
-                      "sha256": hashlib.sha256((output / "tokenizer.json").read_bytes()).hexdigest(),
-                      "vocab_size": tokenizer.get_vocab_size(), "eos_token_id": eos,
-                      "add_bos": False, "append_eos": True},
-        "format": {"dtype": "<u2", "sequence_length": args.sequence_length,
-                   "packing": "separate continuous streams per split; no padding or document mask",
-                   "labels": "pass input_ids as labels; MiniLlama shifts labels internally"},
-        "counts": dict(counts), "filtered_documents": dict(filtered),
+        "source": {
+            "repo_id": "HuggingFaceFW/fineweb-edu",
+            "license_in_dataset_card": "odc-by",
+            "input_dir": str(root),
+            "discovered_files": len(files),
+            "sampling": "seeded per-dump round-robin; shuffled files, row groups and batches",
+            "files_read": sources,
+            "selected_by_source": selected_by_source,
+        },
+        "parameters": {
+            key: str(value) if isinstance(value, Path) else value
+            for key, value in vars(args).items()
+        },
+        "tokenizer": {
+            "source_path": str(args.tokenizer.resolve()),
+            "file": "tokenizer.json",
+            "sha256": hashlib.sha256((output / "tokenizer.json").read_bytes()).hexdigest(),
+            "vocab_size": tokenizer.get_vocab_size(),
+            "eos_token_id": eos,
+            "add_bos": False,
+            "append_eos": True,
+        },
+        "format": {
+            "dtype": "<u2",
+            "sequence_length": args.sequence_length,
+            "packing": "separate continuous streams per split; no padding or document mask",
+            "labels": "pass input_ids as labels; MiniLlama shifts labels internally",
+        },
+        "counts": dict(counts),
+        "filtered_documents": dict(filtered),
         "splits": {split: writer.stats() for split, writer in writers.items()},
         "elapsed_seconds": round(time.monotonic() - start, 2),
     }
-    (output / "summary.json").write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n",
-                                         encoding="utf-8")
-    print(json.dumps({"status": summary["status"], "splits": summary["splits"],
-                      "elapsed_seconds": summary["elapsed_seconds"]}, ensure_ascii=False, indent=2))
+    (output / "summary.json").write_text(
+        json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
+    )
+    print(
+        json.dumps(
+            {
+                "status": summary["status"],
+                "splits": summary["splits"],
+                "elapsed_seconds": summary["elapsed_seconds"],
+            },
+            ensure_ascii=False,
+            indent=2,
+        )
+    )
     # 文件存在甚至能 reshape，并不表示预算达标。语料耗尽时保留统计供排查，
     # 同时以异常退出，让调用脚本或使用者知道这次没有准备成功。
     if not complete:

@@ -39,14 +39,19 @@ from dummym.models.llama_like import MiniLlamaConfig, MiniLlamaForCausalLM  # no
 
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--data-dir", type=Path,
-                        default=PROJECT_ROOT / "data/tokenized/m01_fineweb_100m")
-    parser.add_argument("--model-config", type=Path,
-                        default=PROJECT_ROOT / "configs/model/ladder/v001/p039m.yaml")
+    parser.add_argument(
+        "--data-dir", type=Path, default=PROJECT_ROOT / "data/tokenized/m01_fineweb_100m"
+    )
+    parser.add_argument(
+        "--model-config", type=Path, default=PROJECT_ROOT / "configs/model/ladder/v001/p039m.yaml"
+    )
     parser.add_argument("--output-dir", type=Path)
     parser.add_argument("--resume", type=Path)
-    parser.add_argument("--device", default="cuda",
-                        help="cuda、cuda:N 或 cpu；N 是当前进程可见 GPU 的逻辑编号，从 0 开始")
+    parser.add_argument(
+        "--device",
+        default="cuda",
+        help="cuda、cuda:N 或 cpu；N 是当前进程可见 GPU 的逻辑编号，从 0 开始",
+    )
     parser.add_argument("--precision", choices=("bf16", "fp32"), default="bf16")
     parser.add_argument("--batch-size", type=int, default=4, help="每个 micro-batch 的序列数")
     parser.add_argument("--grad-accum-steps", type=int, default=4)
@@ -61,15 +66,29 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--eval-every", type=int, default=100)
     parser.add_argument("--save-every", type=int, default=100)
     parser.add_argument("--log-every", type=int, default=10)
-    parser.add_argument("--eval-batches", type=int, default=0,
-                        help="0 验证全部数据；正数只验证固定前 N 个 batch，适用于快速调试")
-    parser.add_argument("--stop-after-steps", type=int,
-                        help="在指定总更新步数暂停并保存，不改变由 epochs 决定的完整 LR 计划")
+    parser.add_argument(
+        "--eval-batches",
+        type=int,
+        default=0,
+        help="0 验证全部数据；正数只验证固定前 N 个 batch，适用于快速调试",
+    )
+    parser.add_argument(
+        "--stop-after-steps",
+        type=int,
+        help="在指定总更新步数暂停并保存，不改变由 epochs 决定的完整 LR 计划",
+    )
     parser.add_argument("--seed", type=int, default=2026)
     parser.add_argument("--cpu-threads", type=int, default=4)
     args = parser.parse_args()
-    for name in ("batch_size", "grad_accum_steps", "epochs", "eval_every", "save_every",
-                 "log_every", "cpu_threads"):
+    for name in (
+        "batch_size",
+        "grad_accum_steps",
+        "epochs",
+        "eval_every",
+        "save_every",
+        "log_every",
+        "cpu_threads",
+    ):
         if getattr(args, name) <= 0:
             parser.error(f"{name} 必须为正数")
     for name in ("learning_rate", "max_grad_norm"):
@@ -172,9 +191,14 @@ def load_data(directory: Path, config: MiniLlamaConfig):
     if tokenizer_sha != metadata["tokenizer"]["sha256"]:
         raise ValueError("tokenizer 内容与数据摘要的指纹不一致")
     tokenizer = Tokenizer.from_file(str(tokenizer_path))
-    if tokenizer.get_vocab_size() != config.vocab_size or config.vocab_size != metadata["tokenizer"]["vocab_size"]:
+    if (
+        tokenizer.get_vocab_size() != config.vocab_size
+        or config.vocab_size != metadata["tokenizer"]["vocab_size"]
+    ):
         raise ValueError("模型、tokenizer 和数据摘要的词表大小不一致")
-    if config.eos_token_id != metadata["tokenizer"]["eos_token_id"] or config.eos_token_id != tokenizer.token_to_id("</s>"):
+    if config.eos_token_id != metadata["tokenizer"][
+        "eos_token_id"
+    ] or config.eos_token_id != tokenizer.token_to_id("</s>"):
         raise ValueError("模型与数据的 EOS 约定不一致")
     if config.bos_token_id != tokenizer.token_to_id("<s>"):
         raise ValueError("模型与 tokenizer 的 BOS ID 不一致")
@@ -182,7 +206,9 @@ def load_data(directory: Path, config: MiniLlamaConfig):
     fingerprint = {"tokenizer_sha256": tokenizer_sha, "sequence_length": sequence_length}
     for split in ("train", "validation"):
         path = directory / f"{split}.bin"
-        datasets[split] = PackedDataset(path, metadata["splits"][split], sequence_length, config.vocab_size)
+        datasets[split] = PackedDataset(
+            path, metadata["splits"][split], sequence_length, config.vocab_size
+        )
         fingerprint[f"{split}_sha256"] = file_sha256(path)
     return datasets, fingerprint, tokenizer_path
 
@@ -209,17 +235,25 @@ def make_optimizer(model, args):
     for parameter in model.parameters():
         if parameter.requires_grad:
             (decay if parameter.ndim >= 2 else no_decay).append(parameter)
-    return torch.optim.AdamW([
-        {"params": decay, "weight_decay": args.weight_decay},
-        {"params": no_decay, "weight_decay": 0.0},
-    ], lr=args.learning_rate, betas=(args.beta1, args.beta2))
+    return torch.optim.AdamW(
+        [
+            {"params": decay, "weight_decay": args.weight_decay},
+            {"params": no_decay, "weight_decay": 0.0},
+        ],
+        lr=args.learning_rate,
+        betas=(args.beta1, args.beta2),
+    )
 
 
 def precision_context(device: torch.device, precision: str):
     # BF16 只包裹 forward/loss：矩阵运算可用 BF16，参数和 AdamW 状态仍保留 FP32。
     # backward 放在上下文之外，由对应 forward 的数据类型决定反向算子的精度。
     # BF16 的指数范围接近 FP32，本脚本不启用面向 FP16 下溢问题的 GradScaler。
-    return torch.autocast(device_type="cuda", dtype=torch.bfloat16) if precision == "bf16" else nullcontext()
+    return (
+        torch.autocast(device_type="cuda", dtype=torch.bfloat16)
+        if precision == "bf16"
+        else nullcontext()
+    )
 
 
 def train_update(model, optimizer, dataset, indices, args, device):
@@ -233,7 +267,7 @@ def train_update(model, optimizer, dataset, indices, args, device):
     optimizer.zero_grad(set_to_none=True)
     mean_loss = 0.0
     for start in range(0, len(indices), args.batch_size):
-        part = indices[start:start + args.batch_size]
+        part = indices[start : start + args.batch_size]
         batch = dataset.batch(part, device)
         with precision_context(device, args.precision):
             loss = model(input_ids=batch, labels=batch).loss
@@ -258,7 +292,11 @@ def evaluate(model, dataset, args, device):
     """
     was_training = model.training
     model.eval()
-    count = len(dataset) if args.eval_batches == 0 else min(len(dataset), args.eval_batches * args.batch_size)
+    count = (
+        len(dataset)
+        if args.eval_batches == 0
+        else min(len(dataset), args.eval_batches * args.batch_size)
+    )
     weighted_loss = 0.0
     try:
         for start in range(0, count, args.batch_size):
@@ -281,8 +319,10 @@ def epoch_order(size: int, seed: int, epoch: int) -> np.ndarray:
 
 
 def rng_state(device):
-    return {"cpu": torch.get_rng_state(),
-            "cuda": torch.cuda.get_rng_state(device) if device.type == "cuda" else None}
+    return {
+        "cpu": torch.get_rng_state(),
+        "cuda": torch.cuda.get_rng_state(device) if device.type == "cuda" else None,
+    }
 
 
 def restore_rng(state, device):
@@ -299,11 +339,16 @@ def save_checkpoint(path, model, optimizer, scheduler, progress, contract, token
     数据指纹、训练约定和数据游标也一起保存，避免“能加载权重，却悄悄换了实验”。
     """
     checkpoint = {
-        "format_version": 1, "model_config": model.config.to_dict(),
-        "model_state_dict": model.state_dict(), "optimizer_state_dict": optimizer.state_dict(),
-        "scheduler_state_dict": scheduler.state_dict(), "progress": dict(progress),
-        "contract": contract, "rng_state": rng_state(device),
-        "tokenizer_path": str(tokenizer_path.resolve()), "torch_version": str(torch.__version__),
+        "format_version": 1,
+        "model_config": model.config.to_dict(),
+        "model_state_dict": model.state_dict(),
+        "optimizer_state_dict": optimizer.state_dict(),
+        "scheduler_state_dict": scheduler.state_dict(),
+        "progress": dict(progress),
+        "contract": contract,
+        "rng_state": rng_state(device),
+        "tokenizer_path": str(tokenizer_path.resolve()),
+        "torch_version": str(torch.__version__),
     }
     temporary = path.with_suffix(".pt.tmp")
     torch.save(checkpoint, temporary)
@@ -327,9 +372,12 @@ def main() -> None:
     device = resolve_device(args.device)
     if device.type == "cuda":
         torch.cuda.set_device(device)
-        print(f"CUDA device={device} name={torch.cuda.get_device_name(device)} "
-              f"visible_count={torch.cuda.device_count()} "
-              f"CUDA_VISIBLE_DEVICES={os.environ.get('CUDA_VISIBLE_DEVICES')!r}", flush=True)
+        print(
+            f"CUDA device={device} name={torch.cuda.get_device_name(device)} "
+            f"visible_count={torch.cuda.device_count()} "
+            f"CUDA_VISIBLE_DEVICES={os.environ.get('CUDA_VISIBLE_DEVICES')!r}",
+            flush=True,
+        )
     if args.precision == "bf16" and (device.type != "cuda" or not torch.cuda.is_bf16_supported()):
         raise ValueError("bf16 模式需要支持 BF16 的 CUDA GPU；CPU 调试请显式使用 --precision fp32")
 
@@ -345,12 +393,28 @@ def main() -> None:
         raise ValueError("warmup-steps 必须小于完整训练步数；小数据调试可设为 0")
     # stop_after_steps 只控制本次进程的停止点，不出现在训练约定里。恢复时可以
     # 延后/去掉停止点，但不允许改 batch、epochs 或 LR，否则就不是接着同一实验训练。
-    recipe_names = ("batch_size", "grad_accum_steps", "epochs", "learning_rate", "min_lr_ratio",
-                    "warmup_steps", "weight_decay", "beta1", "beta2", "max_grad_norm",
-                    "seed", "precision", "eval_batches")
-    contract = {"model_config": config.to_dict(), "data": data_fingerprint,
-                "recipe": {name: getattr(args, name) for name in recipe_names},
-                "device_type": device.type, "total_steps": total_steps}
+    recipe_names = (
+        "batch_size",
+        "grad_accum_steps",
+        "epochs",
+        "learning_rate",
+        "min_lr_ratio",
+        "warmup_steps",
+        "weight_decay",
+        "beta1",
+        "beta2",
+        "max_grad_norm",
+        "seed",
+        "precision",
+        "eval_batches",
+    )
+    contract = {
+        "model_config": config.to_dict(),
+        "data": data_fingerprint,
+        "recipe": {name: getattr(args, name) for name in recipe_names},
+        "device_type": device.type,
+        "total_steps": total_steps,
+    }
     checkpoint = None
     if args.resume is not None:
         # checkpoint 只含 Tensor、字典及基本类型，显式启用受限的 weights_only 加载。
@@ -363,10 +427,19 @@ def main() -> None:
     model = MiniLlamaForCausalLM(config).to(device)
     optimizer = make_optimizer(model, args)
     scheduler = torch.optim.lr_scheduler.LambdaLR(
-        optimizer, lr_lambda=lambda index: lr_factor(index, total_steps, args.warmup_steps, args.min_lr_ratio))
-    progress = {"step": 0, "epoch": 0, "next_sequence": 0, "tokens_seen": 0,
-                "last_train_loss": None, "initial_validation_loss": None,
-                "validation_loss": None, "validation_step": None}
+        optimizer,
+        lr_lambda=lambda index: lr_factor(index, total_steps, args.warmup_steps, args.min_lr_ratio),
+    )
+    progress = {
+        "step": 0,
+        "epoch": 0,
+        "next_sequence": 0,
+        "tokens_seen": 0,
+        "last_train_loss": None,
+        "initial_validation_loss": None,
+        "validation_loss": None,
+        "validation_step": None,
+    }
     if checkpoint is not None:
         model.load_state_dict(checkpoint["model_state_dict"], strict=True)
         # 先构造 scheduler，再加载优化器和 scheduler 状态，避免 scheduler 初始化
@@ -377,19 +450,26 @@ def main() -> None:
         validate_progress(progress, rows, effective_batch, args.epochs)
         if scheduler.last_epoch != progress["step"]:
             raise ValueError("学习率进度与 optimizer step 不一致")
-        if progress["tokens_seen"] != (progress["epoch"] * rows + progress["next_sequence"]) * sequence_length:
+        if (
+            progress["tokens_seen"]
+            != (progress["epoch"] * rows + progress["next_sequence"]) * sequence_length
+        ):
             raise ValueError("checkpoint 的 tokens_seen 与数据游标不一致")
 
     stop_step = min(total_steps, args.stop_after_steps or total_steps)
     if stop_step <= progress["step"]:
         raise ValueError("停止步数必须大于 checkpoint 已完成的步数")
-    output = (args.output_dir or (args.resume.parent if args.resume else PROJECT_ROOT / "runs/m01_39m")).resolve()
+    output = (
+        args.output_dir or (args.resume.parent if args.resume else PROJECT_ROOT / "runs/m01_39m")
+    ).resolve()
     if args.resume is None or output != args.resume.resolve().parent:
         output.mkdir(parents=True, exist_ok=False)
     checkpoint_path = output / "checkpoint.pt"
     # 恢复时清除旧日志中晚于 checkpoint 的 step，避免崩溃前已记录但未保存的曲线
     # 与重新执行的曲线混在一起。指定另一个新 output-dir 也可从 checkpoint 分叉调试。
-    writer = SummaryWriter(str(output / "tensorboard"), purge_step=progress["step"] + 1 if checkpoint else None)
+    writer = SummaryWriter(
+        str(output / "tensorboard"), purge_step=progress["step"] + 1 if checkpoint else None
+    )
     if checkpoint is not None:
         # 模型重建会消耗随机数，所以必须在初始化、加载完成后再恢复 CPU/CUDA RNG。
         restore_rng(checkpoint["rng_state"], device)
@@ -399,9 +479,12 @@ def main() -> None:
     start_step = progress["step"]
     if device.type == "cuda":
         torch.cuda.reset_peak_memory_stats(device)
-    print(f"parameters={model.num_parameters():,} device={device} precision={args.precision} "
-          f"total_steps={total_steps} start_step={start_step} stop_step={stop_step} "
-          f"effective_batch={effective_batch} sequences", flush=True)
+    print(
+        f"parameters={model.num_parameters():,} device={device} precision={args.precision} "
+        f"total_steps={total_steps} start_step={start_step} stop_step={stop_step} "
+        f"effective_batch={effective_batch} sequences",
+        flush=True,
+    )
 
     def validate_and_log():
         loss, count = evaluate(model, datasets["validation"], args, device)
@@ -410,13 +493,24 @@ def main() -> None:
         if progress["initial_validation_loss"] is None:
             progress["initial_validation_loss"] = loss
         writer.add_scalar("validation/loss", loss, progress["step"])
-        writer.add_scalar("validation/prediction_tokens", count * (sequence_length - 1), progress["step"])
+        writer.add_scalar(
+            "validation/prediction_tokens", count * (sequence_length - 1), progress["step"]
+        )
         print(f"validation step={progress['step']} loss={loss:.6f} sequences={count}", flush=True)
 
     try:
         if progress["step"] == 0:
             validate_and_log()
-            save_checkpoint(checkpoint_path, model, optimizer, scheduler, progress, contract, tokenizer_path, device)
+            save_checkpoint(
+                checkpoint_path,
+                model,
+                optimizer,
+                scheduler,
+                progress,
+                contract,
+                tokenizer_path,
+                device,
+            )
         model.train()
         order_epoch = None
         order = None
@@ -449,31 +543,55 @@ def main() -> None:
                 progress["epoch"] += 1
                 progress["next_sequence"] = 0
             step = progress["step"]
-            metrics = {"loss": loss, "learning_rate": learning_rate, "gradient_norm": norm,
-                       "tokens_seen": progress["tokens_seen"],
-                       "tokens_per_second": len(indices) * sequence_length / update_seconds}
+            metrics = {
+                "loss": loss,
+                "learning_rate": learning_rate,
+                "gradient_norm": norm,
+                "tokens_seen": progress["tokens_seen"],
+                "tokens_per_second": len(indices) * sequence_length / update_seconds,
+            }
             if device.type == "cuda":
                 metrics["peak_memory_gib"] = torch.cuda.max_memory_allocated(device) / 1024**3
             for key, value in metrics.items():
                 writer.add_scalar(f"train/{key}", value, step)
             if step == 1 or step % args.log_every == 0 or step == stop_step:
-                print(f"step={step}/{total_steps} loss={loss:.6f} lr={learning_rate:.3e} "
-                      f"grad_norm={norm:.4f} tokens/s={metrics['tokens_per_second']:.0f}", flush=True)
+                print(
+                    f"step={step}/{total_steps} loss={loss:.6f} lr={learning_rate:.3e} "
+                    f"grad_norm={norm:.4f} tokens/s={metrics['tokens_per_second']:.0f}",
+                    flush=True,
+                )
             if step % args.eval_every == 0 or step == stop_step:
                 validate_and_log()
             if step % args.save_every == 0 or step == stop_step:
-                save_checkpoint(checkpoint_path, model, optimizer, scheduler, progress, contract, tokenizer_path, device)
+                save_checkpoint(
+                    checkpoint_path,
+                    model,
+                    optimizer,
+                    scheduler,
+                    progress,
+                    contract,
+                    tokenizer_path,
+                    device,
+                )
                 writer.flush()
     finally:
         # 异常或 Ctrl+C 不保存半更新状态；保留最近一次完整 checkpoint 供 --resume。
         writer.close()
 
-    summary = {"status": "complete" if progress["step"] == total_steps else "paused",
-               "model_parameters": model.num_parameters(), "progress": progress,
-               "contract": contract, "device": str(device), "start_step": start_step,
-               "session_elapsed_seconds": round(time.perf_counter() - started, 2),
-               "prediction_tokens_seen": progress["tokens_seen"] // sequence_length * (sequence_length - 1),
-               "checkpoint": str(checkpoint_path), "tensorboard": str(output / "tensorboard")}
+    summary = {
+        "status": "complete" if progress["step"] == total_steps else "paused",
+        "model_parameters": model.num_parameters(),
+        "progress": progress,
+        "contract": contract,
+        "device": str(device),
+        "start_step": start_step,
+        "session_elapsed_seconds": round(time.perf_counter() - started, 2),
+        "prediction_tokens_seen": progress["tokens_seen"]
+        // sequence_length
+        * (sequence_length - 1),
+        "checkpoint": str(checkpoint_path),
+        "tensorboard": str(output / "tensorboard"),
+    }
     temporary = output / "summary.json.tmp"
     temporary.write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     temporary.replace(output / "summary.json")

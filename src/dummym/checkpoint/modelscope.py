@@ -1,6 +1,7 @@
 """完整 checkpoint 的 ModelScope 归档；认证与训练循环相互独立。"""
 
 import argparse
+import hashlib
 import json
 import os
 from pathlib import Path
@@ -86,7 +87,8 @@ def upload_checkpoint(directory: Path, root: Path, repo_id: str, api: HubApi) ->
         f"- 已读取 token：{progress['tokens_seen']:,}\n"
         f"- 验证 loss：{progress.get('validation_loss')}\n"
         f"- SHA-256：`{digest}`\n\n"
-        "`checkpoint.pt` 包含模型、优化器、调度器、数据指纹和各 rank RNG。\n"
+        "checkpoint 的恢复字段由阶段决定：M0 为过拟合产物，M1 为单卡恢复，"
+        "DDP 正式训练包含各 rank RNG。恢复能力见 ready.json。\n"
         "加载使用 `torch.load(..., weights_only=True)`；恢复须匹配 ready.json 中的训练约定。\n"
     )
     api.upload_folder(
@@ -115,8 +117,7 @@ def main() -> None:
     api = authenticated_api(args.root)
     repo_id = initialize_repository(args.root, api)
     print(f"ModelScope repository: {repo_id}", flush=True)
-    if args.docs:
-        synchronize_docs(args.root, repo_id, api)
+    docs_fingerprint = None
     if args.folder:
         relative = args.folder.resolve().relative_to((args.root / "exports").resolve()).as_posix()
         api.upload_folder(
@@ -128,6 +129,22 @@ def main() -> None:
             commit_message=f"Publish exported model {relative}",
         )
     while True:
+        if args.docs:
+            document_files = [
+                args.root / "repo/README.md",
+                *sorted((args.root / "repo/docs").glob("*.md")),
+            ]
+            fingerprint = hashlib.sha256(
+                b"".join(path.read_bytes() for path in document_files)
+            ).hexdigest()
+            if fingerprint != docs_fingerprint:
+                try:
+                    synchronize_docs(args.root, repo_id, api)
+                    docs_fingerprint = fingerprint
+                except Exception as error:
+                    print(f"Documentation upload failed: {type(error).__name__}", flush=True)
+                    if not args.watch:
+                        raise RuntimeError("Documentation upload failed") from None
         for ready_path in sorted((args.root / "runs").glob("*/milestones/*/ready.json")):
             try:
                 upload_checkpoint(ready_path.parent, args.root, repo_id, api)

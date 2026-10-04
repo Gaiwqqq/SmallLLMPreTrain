@@ -51,13 +51,25 @@ def test_no_visible_gpu_has_clear_error_and_cpu_still_works(monkeypatch):
 def prepared_data(tmp_path):
     directory = tmp_path / "data"
     directory.mkdir()
-    tokenizer = Tokenizer(models.WordLevel({"<s>": 1, "</s>": 2, "<unk>": 0,
-                                           **{f"word{i}": i + 3 for i in range(61)}}, unk_token="<unk>"))
+    tokenizer = Tokenizer(
+        models.WordLevel(
+            {"<s>": 1, "</s>": 2, "<unk>": 0, **{f"word{i}": i + 3 for i in range(61)}},
+            unk_token="<unk>",
+        )
+    )
     tokenizer.save(str(directory / "tokenizer.json"))
-    config = MiniLlamaConfig(vocab_size=64, hidden_size=16, intermediate_size=32,
-                            num_hidden_layers=1, num_attention_heads=4, num_key_value_heads=2,
-                            max_position_embeddings=8, bos_token_id=1, eos_token_id=2,
-                            attention_dropout=0.1)
+    config = MiniLlamaConfig(
+        vocab_size=64,
+        hidden_size=16,
+        intermediate_size=32,
+        num_hidden_layers=1,
+        num_attention_heads=4,
+        num_key_value_heads=2,
+        max_position_embeddings=8,
+        bos_token_id=1,
+        eos_token_id=2,
+        attention_dropout=0.1,
+    )
     model_path = tmp_path / "model.yaml"
     model_path.write_text(yaml.safe_dump({"model_config": config.to_dict()}))
     stats = {}
@@ -68,9 +80,17 @@ def prepared_data(tmp_path):
         ids[:, -1] = 2
         ids.astype("<u2").tofile(directory / f"{split}.bin")
         stats[split] = {"written_tokens": count * 8, "sequences": count, "bytes": count * 16}
-    metadata = {"status": "complete", "format": {"dtype": "<u2", "sequence_length": 8},
-                "tokenizer": {"file": "tokenizer.json", "sha256": pretrain.file_sha256(directory / "tokenizer.json"),
-                              "vocab_size": 64, "eos_token_id": 2}, "splits": stats}
+    metadata = {
+        "status": "complete",
+        "format": {"dtype": "<u2", "sequence_length": 8},
+        "tokenizer": {
+            "file": "tokenizer.json",
+            "sha256": pretrain.file_sha256(directory / "tokenizer.json"),
+            "vocab_size": 64,
+            "eos_token_id": 2,
+        },
+        "splits": stats,
+    }
     (directory / "summary.json").write_text(json.dumps(metadata))
     return directory, model_path, config
 
@@ -91,14 +111,33 @@ def test_accumulation_matches_single_batch_with_uneven_tail(prepared_data):
     torch.manual_seed(11)
     first = MiniLlamaForCausalLM(config)
     second = copy.deepcopy(first)
-    args = SimpleNamespace(batch_size=2, precision="fp32", max_grad_norm=1.0,
-                           learning_rate=0.001, beta1=0.9, beta2=0.95, weight_decay=0.1)
+    args = SimpleNamespace(
+        batch_size=2,
+        precision="fp32",
+        max_grad_norm=1.0,
+        learning_rate=0.001,
+        beta1=0.9,
+        beta2=0.95,
+        weight_decay=0.1,
+    )
     indices = np.array([1, 3, 5])
-    first_loss, _ = pretrain.train_update(first, pretrain.make_optimizer(first, args),
-                                         datasets["train"], indices, args, torch.device("cpu"))
+    first_loss, _ = pretrain.train_update(
+        first,
+        pretrain.make_optimizer(first, args),
+        datasets["train"],
+        indices,
+        args,
+        torch.device("cpu"),
+    )
     args.batch_size = 3
-    second_loss, _ = pretrain.train_update(second, pretrain.make_optimizer(second, args),
-                                          datasets["train"], indices, args, torch.device("cpu"))
+    second_loss, _ = pretrain.train_update(
+        second,
+        pretrain.make_optimizer(second, args),
+        datasets["train"],
+        indices,
+        args,
+        torch.device("cpu"),
+    )
     assert first_loss == pytest.approx(second_loss, abs=1e-6)
     for left, right in zip(first.parameters(), second.parameters()):
         torch.testing.assert_close(left, right, atol=2e-6, rtol=1e-5)
@@ -121,11 +160,38 @@ def test_validation_weights_last_batch_and_restores_train_mode(prepared_data):
 
 def run_cli(monkeypatch, prepared_data, output, extra=()):
     directory, config, _ = prepared_data
-    monkeypatch.setattr(sys, "argv", [str(SCRIPT), "--data-dir", str(directory),
-                        "--model-config", str(config), "--output-dir", str(output),
-                        "--device", "cpu", "--precision", "fp32", "--batch-size", "2",
-                        "--grad-accum-steps", "2", "--epochs", "2", "--warmup-steps", "1",
-                        "--save-every", "2", "--eval-every", "2", "--cpu-threads", "1", *extra])
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            str(SCRIPT),
+            "--data-dir",
+            str(directory),
+            "--model-config",
+            str(config),
+            "--output-dir",
+            str(output),
+            "--device",
+            "cpu",
+            "--precision",
+            "fp32",
+            "--batch-size",
+            "2",
+            "--grad-accum-steps",
+            "2",
+            "--epochs",
+            "2",
+            "--warmup-steps",
+            "1",
+            "--save-every",
+            "2",
+            "--eval-every",
+            "2",
+            "--cpu-threads",
+            "1",
+            *extra,
+        ],
+    )
     pretrain.main()
 
 
@@ -155,7 +221,13 @@ def test_resume_matches_uninterrupted_training_across_epoch(monkeypatch, prepare
     run_cli(monkeypatch, prepared_data, resumed, ("--resume", str(resumed / "checkpoint.pt")))
     expected = torch.load(full / "checkpoint.pt", weights_only=True)
     actual = torch.load(resumed / "checkpoint.pt", weights_only=True)
-    for name in ("model_state_dict", "optimizer_state_dict", "scheduler_state_dict", "progress", "rng_state"):
+    for name in (
+        "model_state_dict",
+        "optimizer_state_dict",
+        "scheduler_state_dict",
+        "progress",
+        "rng_state",
+    ):
         assert_identical(expected[name], actual[name])
     assert actual["progress"]["tokens_seen"] == 7 * 8 * 2
     assert actual["progress"]["epoch"] == 2
