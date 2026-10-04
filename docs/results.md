@@ -55,6 +55,8 @@
 
 四卡 SFT 恢复快照接口也已实测通过并上传：`sft-interface-smoke-v4` 含模型、optimizer、scheduler、trainer_state 和四份 RNG。它使用极小合成模型，仅验证接口。最新常规测试为 39 passed（11.46s）。
 
+2026-10-05，本轮所选预训练原始分片（24/16/4）及 SFT 的 5 个分片全部下载完成；全量清洗正在进行。pilot 模型、原始续写样例和阶段指南已同步 ModelScope。正式预训练须等待唯一 token 容量统计，不能把下载字节数当作训练 token 数。
+
 ## 自动阶段进度
 
 | 阶段 | 状态 | 说明 |

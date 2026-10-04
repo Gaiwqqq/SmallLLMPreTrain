@@ -42,7 +42,7 @@ dummym-pack --clean ../data/clean/english \
 
 ## 本次结果
 
-已清洗 pilot 三个来源，分别最多接受 100,000 文档；自训 32K ByteLevel BPE 与约 100M token 混合 pilot 已生成。完整语料正在下载，最终规模将由清洗后的唯一 token 容量决定。 实测证据见 [运行记录](results.md)。
+已清洗 pilot 三个来源，分别最多接受 100,000 文档；自训 32K ByteLevel BPE 与约 100M token 混合 pilot 已生成。所选原始分片全部下载完成：FineWeb-Edu 24 个、Cosmopedia-v2 16 个、TinyStories 4 个。正在执行完整清洗，最终规模将由清洗后的唯一 token 容量决定。实测证据见 [运行记录](results.md)。
 
 实际 pilot 审计已通过：300,000 个文档的内容哈希与分割规则一致，不同来源和 split 间没有完全重复文档；英文、中文、重音字符、emoji 和空白往返保持原文，六个特殊 token 的 ID 及 assistant-only 监督边界符合模型约定。该检查不证明语义近重复已全部消除。
 
