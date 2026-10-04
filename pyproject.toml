@@ -13,6 +13,18 @@ dependencies = [
     "torch>=2.2",
 ]
 
+[project.scripts]
+dummym-download = "dummym.data.acquisition:main"
+dummym-clean = "dummym.data.corpus:main"
+dummym-tokenizer = "dummym.tokenizer.train:main"
+dummym-pack = "dummym.data.packing:main"
+dummym-pretrain = "dummym.training.cli:main"
+dummym-export = "dummym.checkpoint.huggingface:main"
+dummym-sft = "dummym.posttrain.sft:main"
+dummym-chat = "dummym.inference.chat:main"
+dummym-evaluate = "dummym.evaluation.chat:main"
+dummym-publish = "dummym.checkpoint.modelscope:main"
+
 [project.optional-dependencies]
 train = [
     "numpy>=1.24",
@@ -24,6 +36,17 @@ data = [
 ]
 dev = [
     "pytest>=8",
+    "ruff==0.12.12",
+]
+workflow = [
+    "huggingface-hub>=0.34,<1",
+    "transformers==4.57.1",
+    "trl==0.24.0",
+    "datasets>=3,<5",
+    "safetensors>=0.5",
+    "accelerate>=1.4,<2",
+    "datasketch>=1.6,<2",
+    "modelscope-hub==0.1.2",
 ]
 
 [tool.setuptools.packages.find]
@@ -33,3 +56,10 @@ where = ["src"]
 testpaths = ["tests"]
 pythonpath = ["src"]
 addopts = "-ra"
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]

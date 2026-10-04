@@ -5,6 +5,15 @@ __pycache__/
 .mypy_cache/
 .ruff_cache/
 .venv/
+*.egg-info/
+envs/
+cache/
+tmp/
+exports/
+logs/
+tools/
+data/tokenizer/
+data/clean/
 
 # Secrets and local configuration
 .env
