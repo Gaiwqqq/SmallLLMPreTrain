@@ -64,3 +64,9 @@
 | benchmark-single | complete | /diff/gaiwq/llm_pretrain/logs/benchmark-single.log |
 | benchmark-2-gpu | complete | /diff/gaiwq/llm_pretrain/logs/benchmark-2-gpu.log |
 | benchmark-4-gpu | complete | /diff/gaiwq/llm_pretrain/logs/benchmark-4-gpu.log |
+| verify-compile | failed | /diff/gaiwq/llm_pretrain/logs/verify-compile.log |
+| compile-selection | fallback | Eager retained: RuntimeError |
+| m04_lr_pilot_0 | complete | /diff/gaiwq/llm_pretrain/logs/m04_lr_pilot_0.log |
+| m04_lr_pilot_1 | complete | /diff/gaiwq/llm_pretrain/logs/m04_lr_pilot_1.log |
+| m04_lr_pilot_2 | complete | /diff/gaiwq/llm_pretrain/logs/m04_lr_pilot_2.log |
+| m04_lr_pilot_3 | complete | /diff/gaiwq/llm_pretrain/logs/m04_lr_pilot_3.log |
