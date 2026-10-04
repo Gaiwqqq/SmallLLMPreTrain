@@ -33,5 +33,5 @@
 | pack-pilot | failed | /diff/gaiwq/llm_pretrain/logs/pack-pilot.log |
 | pipeline | failed | RuntimeError: pack-pilot failed with exit code 1 |
 | pilot-capacity-fineweb | complete | /diff/gaiwq/llm_pretrain/logs/pilot-capacity-fineweb.log |
-| pilot-capacity-cosmopedia | running | /diff/gaiwq/llm_pretrain/logs/pilot-capacity-cosmopedia.log |
+| pilot-capacity-cosmopedia | complete | /diff/gaiwq/llm_pretrain/logs/pilot-capacity-cosmopedia.log |
 | pilot-capacity-tinystories | running | /diff/gaiwq/llm_pretrain/logs/pilot-capacity-tinystories.log |
