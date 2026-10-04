@@ -16,8 +16,27 @@
 | 四卡 FSDP2 教学对照 | FP32 SGD 更新差异 1.86e-9；Tensor 输出适配层通过 | runs/m03_fsdp/summary.json |
 | M1 39M 完整预训练 | 99,999,744 输入 token，3052 更新；验证 loss 10.472692 → 4.219103 | runs/m01_39m/summary.json |
 | ModelScope | 私有仓库已创建，根 README 和阶段说明已同步 | [模型仓库](https://modelscope.cn/models/GaiWeiqi/SmallLLMPreTrain-English) |
+| 真实 pilot 数据审计 | 300,000 文档指纹、分割及跨来源精确去重通过；Tokenizer 字符往返、特殊 ID 和 assistant mask 通过 | runs/pilot-audit.json |
 
-证据路径相对于远程 `/diff/gaiwq/llm_pretrain`。Tiny overfit 不衡量泛化，当前还没有通过聊天验收的模型。M1 与历史 loss 4.153138 的差异来自本次不同的抽样分片和运行栈，未使用历史验证集。99M 对照正在四卡执行；正式预训练、正式 SFT 和能力评测仍待完成。
+证据路径相对于远程 `/diff/gaiwq/llm_pretrain`。Tiny overfit 不衡量泛化，当前还没有通过聊天验收的模型。M1 与历史 loss 4.153138 的差异来自本次不同的抽样分片和运行栈，未使用历史验证集。六组 99M 对照已完成；正式预训练、正式 SFT 和能力评测仍待完成。
+
+## 99M 对照与性能实测
+
+每组读取 99,999,744 token，保持数据、模型和更新数一致。下表为本次独立运行的最终验证交叉熵；数值越低越好。
+
+| 学习率 | warmup 更新数 | seed 2026 | seed 2027 |
+|---|---:|---:|---:|
+| 6e-4 | 100 | 3.769134 | 3.758341 |
+| 1e-3 | 100 | 3.725739 | 3.704958 |
+| 1e-3 | 300 | 3.664364 | 3.647846 |
+
+两组 seed 均支持较长 warmup 在本次配置中更好；213M 使用新的混合语料和自训 tokenizer，仍需单独调参。这些结果不等同于聊天能力。
+
+![本次基线训练与验证曲线](figures/baselines.png)
+
+曲线从本次 TensorBoard 原始日志生成；训练粗线使用 EMA（0.95），细线保留原始波动。纵轴放大到 3.4–6.0，初始化约 10.5 的 loss 在图外。复绘入口为 `scripts/evaluation/plot_baselines.py`。
+
+213M 四卡 eager 合成数据基准：micro-batch=16/global-batch=256，217,856 输入 token/s，峰值显存约 44.70 GiB/卡。该测量排除了下载、packing、验证和 checkpoint 上传，正式训练预算会留出余量。最新测试为 39 passed；保留 FP32 参数的四卡 BF16 TRL 接口复测也通过（`runs/sft-interface-smoke-v3/summary.json`）。
 
 ## 自动阶段进度
 
@@ -45,3 +64,9 @@
 | benchmark-single | complete | /diff/gaiwq/llm_pretrain/logs/benchmark-single.log |
 | benchmark-2-gpu | complete | /diff/gaiwq/llm_pretrain/logs/benchmark-2-gpu.log |
 | benchmark-4-gpu | complete | /diff/gaiwq/llm_pretrain/logs/benchmark-4-gpu.log |
+| verify-compile | failed | /diff/gaiwq/llm_pretrain/logs/verify-compile.log |
+| compile-selection | fallback | Eager retained: RuntimeError |
+| m04_lr_pilot_0 | complete | /diff/gaiwq/llm_pretrain/logs/m04_lr_pilot_0.log |
+| m04_lr_pilot_1 | running | /diff/gaiwq/llm_pretrain/logs/m04_lr_pilot_1.log |
+| m04_lr_pilot_2 | running | /diff/gaiwq/llm_pretrain/logs/m04_lr_pilot_2.log |
+| m04_lr_pilot_3 | running | /diff/gaiwq/llm_pretrain/logs/m04_lr_pilot_3.log |
