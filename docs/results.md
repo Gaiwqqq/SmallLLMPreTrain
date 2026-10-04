@@ -30,3 +30,18 @@
 | download-tinystories-pilot | complete | /diff/gaiwq/llm_pretrain/logs/download-tinystories-pilot.log |
 | clean-pilot | complete | /diff/gaiwq/llm_pretrain/logs/clean-pilot.log |
 | train-tokenizer | complete | /diff/gaiwq/llm_pretrain/logs/train-tokenizer.log |
+| pack-pilot | complete | /diff/gaiwq/llm_pretrain/logs/pack-pilot.log |
+| pipeline | failed | RuntimeError: pack-pilot failed with exit code 1 |
+| pilot-capacity-fineweb | complete | /diff/gaiwq/llm_pretrain/logs/pilot-capacity-fineweb.log |
+| pilot-capacity-cosmopedia | complete | /diff/gaiwq/llm_pretrain/logs/pilot-capacity-cosmopedia.log |
+| pilot-capacity-tinystories | complete | /diff/gaiwq/llm_pretrain/logs/pilot-capacity-tinystories.log |
+| pilot-previous-attempt | retained | Incomplete packing preserved at /diff/gaiwq/llm_pretrain/data/failed/pilot100m-1791131011 |
+| full-data-background | running | /diff/gaiwq/llm_pretrain/logs/full-data.log |
+| reproduce-baselines | complete | /diff/gaiwq/llm_pretrain/logs/reproduce-baselines.log |
+| verify-ddp-resume | complete | /diff/gaiwq/llm_pretrain/logs/verify-ddp-resume.log |
+| verify-trl-sft | complete | /diff/gaiwq/llm_pretrain/logs/verify-trl-sft.log |
+| verify-four-gpu-ddp | complete | /diff/gaiwq/llm_pretrain/logs/verify-four-gpu-ddp.log |
+| verify-fsdp2 | complete | /diff/gaiwq/llm_pretrain/logs/verify-fsdp2.log |
+| benchmark-single | complete | /diff/gaiwq/llm_pretrain/logs/benchmark-single.log |
+| benchmark-2-gpu | complete | /diff/gaiwq/llm_pretrain/logs/benchmark-2-gpu.log |
+| benchmark-4-gpu | complete | /diff/gaiwq/llm_pretrain/logs/benchmark-4-gpu.log |
