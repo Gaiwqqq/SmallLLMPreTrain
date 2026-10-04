@@ -39,6 +39,7 @@ dev = [
     "ruff==0.12.12",
 ]
 workflow = [
+    "matplotlib==3.10.7",
     "huggingface-hub>=0.34,<1",
     "transformers==4.57.1",
     "trl==0.24.0",

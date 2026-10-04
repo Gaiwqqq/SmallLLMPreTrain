@@ -66,7 +66,7 @@ def synchronize_docs(root: Path, repo_id: str, api: HubApi) -> None:
         repo_type="model",
         folder_path=repo / "docs",
         path_in_repo="docs",
-        allow_patterns=["*.md"],
+        allow_patterns=["*.md", "figures/*.png"],
         commit_message="Synchronize phase learning guides",
         disable_tqdm=True,
         tracker_path=root / "cache/modelscope/docs-upload.json",
@@ -139,6 +139,7 @@ def main() -> None:
             document_files = [
                 args.root / "repo/README.md",
                 *sorted((args.root / "repo/docs").glob("*.md")),
+                *sorted((args.root / "repo/docs/figures").glob("*.png")),
             ]
             fingerprint = hashlib.sha256(
                 b"".join(path.read_bytes() for path in document_files)

@@ -77,9 +77,17 @@ def main() -> None:
         seen.add(digest)
         return True
 
+    def has_assistant_targets(example):
+        encoded = tokenizer.apply_chat_template(
+            example["messages"], tokenize=True, return_dict=True, return_assistant_tokens_mask=True
+        )
+        # 超长 user prompt 若截断后没有 assistant 标签，会产生全忽略的 batch。
+        return any(encoded["assistant_masks"][1:2048])
+
     with PartialState().main_process_first():
         dataset = load_dataset("parquet", data_files=files, split="train")
         dataset = dataset.filter(unique, load_from_cache_file=True)
+        dataset = dataset.filter(has_assistant_targets, load_from_cache_file=True)
     split = dataset.train_test_split(test_size=0.01, seed=2026)
     if args.max_conversations:
         split["train"] = split["train"].select(
@@ -88,7 +96,8 @@ def main() -> None:
     model = AutoModelForCausalLM.from_pretrained(
         args.model,
         local_files_only=True,
-        dtype=torch.bfloat16,
+        # 全参数 SFT 保留 FP32 权重与 AdamW 状态，BF16 只用于 Trainer 的计算。
+        dtype=torch.float32,
         attn_implementation="sdpa",
     )
     model.config.use_cache = False

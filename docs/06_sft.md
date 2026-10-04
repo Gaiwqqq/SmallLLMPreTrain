@@ -23,6 +23,8 @@ python -m torch.distributed.run --standalone --nproc_per_node=4 --no-python \
 
 导出对照 FP32 logits 和 loss 后才写模型文件。Chat template 使用 <|im_start|> / <|im_end|>，assistant 内容由 generation 标签圈定，user/system/padding 不监督。首轮不跨会话 packing。
 
+全参数 SFT 保留 FP32 参数和 AdamW 状态，由 Trainer 在前向使用 BF16，以避免小学习率更新被 BF16 参数量化吞掉。预处理会过滤截断到 2048 后没有任何 assistant 预测目标的会话，防止全忽略标签导致无效 loss。
+
 LR=1e-5/3e-5/6e-5/1e-4 的独立单卡短跑后，按开发集选定四卡正式配置，最多两轮。训练与验证按整个会话划分、精确去重；最终测试不参与选择。监测 SFT loss 同时检查回复质量，不能只凭最低 loss 选择聊天助手。
 
 ## 本次结果
