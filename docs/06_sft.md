@@ -1,40 +1,56 @@
-# 聊天后训练
+# 聊天后训练：从“接着写”到“回答用户”
 
-## 本阶段学什么
+预训练教模型预测文章的下一 token。你输入“请用三点解释水循环”，Base 可能把它当成某段文章的开头继续写。SFT（监督微调）提供“用户请求 → assistant 回复”的示范，让模型学习对话格式与回答方式。
 
-从续写模型学习 assistant 回复。
+SFT 不能自动补齐所有知识，也不能把很差的 Base 一定变成可靠助手。我们要同时看训练指标和真实回复。
 
-## 输入与阶段成果
+## 为什么选短对话与全参数微调？
 
-Hugging Face 导出、SFT checkpoint、聊天模板与对照结果。
+当前模型上下文为 2048，目标是基础英文交流。`HuggingFaceTB/smol-smoltalk` 提供较适合短对话的训练材料，便于先把回复链路跑通。原始数据卡标记 `apache-2.0`，实际 revision 和文件指纹在下载 manifest 中。
 
-## 设计与可执行步骤
+全参数微调会更新整个小模型。它在当前硬件上可行，也让学习过程直接；LoRA 只训练附加适配参数，可以另做实验，但本轮不额外引入适配器合并等概念。
 
-预训练学习文本分布；SFT 用对话格式教模型回答用户。小模型使用短对话，选择 HuggingFaceTB/smol-smoltalk。首轮全参数微调而不是 LoRA，避免适配器成为额外教学概念。
+## 为什么只监督 assistant？
 
-```bash
-dummym-export --checkpoint ../runs/m04_base/checkpoint.pt \
-  --tokenizer ../data/tokenizer/english32k --output ../exports/base
-dummym-download --repo HuggingFaceTB/smol-smoltalk --files 0 --output ../data/raw/sft
-python -m torch.distributed.run --standalone --nproc_per_node=4 --no-python \
-  "$PRETRAIN_ROOT/envs/train/bin/dummym-sft" --model ../exports/base \
-  --data-dir ../data/raw/sft --output ../runs/m09_sft --learning-rate 3e-5
+训练样例可以这样理解：
+
+```text
+user: 请打个招呼。
+assistant: Hello! How can I help you?
 ```
 
-导出对照 FP32 logits 和 loss 后才写模型文件。Chat template 使用 <|im_start|> / <|im_end|>，assistant 内容由 generation 标签圈定，user/system/padding 不监督。首轮不跨会话 packing。
+用户问题是条件，我们希望模型学的是回复。若把问题也作为同等预测目标，训练会同时教它模仿用户发问；这与“只负责回答”的目标并不完全一致。
 
-全参数 SFT 保留 FP32 参数和 AdamW 状态，由 Trainer 在前向使用 BF16，以避免小学习率更新被 BF16 参数量化吞掉。预处理会过滤截断到 2048 后没有任何 assistant 预测目标的会话，防止全忽略标签导致无效 loss。
+ChatML 的 `<|im_start|>` / `<|im_end|>` 标出角色边界。模板用 generation 标签圈出 assistant 内容，assistant mask 告诉 loss 哪些位置参与监督；user/system/padding 不参与。结束标记也需要学习，否则模型可能一直说下去。
 
-LR=1e-5/3e-5/6e-5/1e-4 的独立单卡短跑后，按开发集选定四卡正式配置，最多两轮。训练与验证按整个会话划分、精确去重；最终测试不参与选择。监测 SFT loss 同时检查回复质量，不能只凭最低 loss 选择聊天助手。
+代码先用小例子核对 mask：解码被监督的 token 应含 assistant 的 “Good morning”，不能含用户的 “Hello”。截断到 2048 后没有任何 assistant 预测目标的样例会被过滤，避免全忽略标签产生无效训练。
 
-正式 SFT 在 Trainer 保存点跨过 10%/25%/50%/完成进度时，额外复制完整恢复目录到 `trainer-milestones/`。复制前等待所有 rank 保存 RNG，目录完成后最后写入 `ready.json`；ModelScope 上传器只处理该标记。因此 Trainer 删除旧 `checkpoint-*` 时不会删除待上传的恢复快照。保存采用 Trainer 原生格式，包含模型、optimizer、scheduler、trainer_state 和各 rank RNG；不要用教学 checkpoint.pt 的加载方式恢复它。短跑对照不重复归档这些大型恢复目录。
+## 为什么首轮不把多段会话 packing？
 
-## 本次结果
+文章预训练可以跨文章拼接，SFT 还涉及角色、回复边界和变长监督 mask。首轮保持一个样例一个会话，先简化这些边界。代价是 padding 较多，GPU 利用率可能低于预训练；后续可以用独立正确性对照验证更高效 packing。
 
-四卡 TRL 在 32 个合成会话上完成训练、验证与保存；最新复测使用 FP32 参数和 BF16 计算。正式聊天 SFT 将在 Base 模型导出后进行，目前没有聊天能力结论。 实测证据见 [运行记录](results.md)。
+会话先整体精确去重，再从训练来源划分 1% 验证集。同一个会话的不同轮次不会拆到两个 split。下载的官方 test 文件不用于这次训练/验证划分，也不替代冻结的最终聊天题集。
 
-`sft-interface-smoke-v4` 已验证完整恢复快照包含模型、optimizer、scheduler、trainer_state 和四份 RNG 文件；这是接口验收用的极小模型。
+## 为什么 SFT 仍保留 FP32 参数？
 
-## 下一步
+SFT 的 LR 较小。若参数本身只以 BF16 存储，细小变化可能在写回时舍入掉。因此全参数及 AdamW 状态保持 FP32，由 Trainer 使用 BF16 计算。省计算资源与保存小更新需要分别考虑。
 
-按根 README 的学习顺序进入下一阶段；未通过验收先定位原因。
+## 怎样选择正式配置？
+
+先从同一个 Base 分别微调四组：LR=1e-5/3e-5/6e-5/1e-4，每组最多 50,000 个训练会话、一轮，各占一张卡。保持 Tokenizer、验证集和其他条件相同，然后生成同一套 40 项开发题。
+
+自动排序先看开发题的结构失败比例，再看验证 loss。这是一个初步筛选规则，**不等同于语义评分**。它能发现空回答、严重复读等问题，不能验证事实和摘要是否正确。最终 120 项测试题不参与这次选择。
+
+正式 SFT 从 Base 重新开始，使用所选 LR，四卡最多两轮，不把某个短跑已经看过的数据偷偷算入正式预算。运行命令由 `scripts/remote/week.py` 的 `posttrain()` 列出。
+
+## 为什么额外复制完整恢复目录？
+
+Trainer 会轮转删除旧 `checkpoint-*`。若上传还没完成，删除会破坏恢复点。正式 SFT 在保存点跨过 10%/25%/50%/完成进度时，复制到独立的 `trainer-milestones/`：先等所有 rank 保存，再完成复制，最后写 `ready.json`。
+
+快照包含模型、optimizer、scheduler、trainer_state 和四个 rank 的 RNG；上传后可用 `dummym-sft --resume` 接着训练。它是 Trainer 原生目录，不是教学单文件 `checkpoint.pt`。短跑对照不额外复制这些大型恢复快照。
+
+## 目前哪些已经验证？
+
+四卡 TRL 在 32 个合成会话上完成训练、验证与保存；`sft-interface-smoke-v4` 还检查了完整快照字段和四份 RNG，快照已实际上传。极小合成模型只验证接口，不代表当前 213M Chat 已训练完成。
+
+正式 SFT 在正式 Base 完成并导出后执行。阶段成果应包含 Chat 模型、模板、完整恢复点、开发对照和失败例子。下一页 [评测](07_evaluation_inference.md) 决定它是否真的能交流，进度见 [运行记录](results.md)。

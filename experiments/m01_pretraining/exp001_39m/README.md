@@ -1,5 +1,28 @@
 # M1：39M 英文预训练基线
 
+<!-- BEGINNER_GUIDE -->
+
+## 初学者导读：从背几句话走向真实文章
+
+**这是保留的历史报告。** 其中 4.153138 是历史验证 loss；本次 39M 复现为 4.219103，两者抽样与环境不同。不要把原报告当作本次运行状态。
+
+**为什么做？** M0 证明能记忆，M1 要证明真实数据能准备、训练能持续推进、未参与更新的文档能独立验证，以及暂停后能接着跑。
+
+**为什么选 39M、100M token？** 先用较小模型和有限预算，降低错误代价。39M 指参数量，100M 指训练输入量，两个数字不是同一件事。这不是最佳模型规模研究。
+
+**为什么使用现成 Tokenizer？** 保持编码固定，先排除 trainer 的问题。权重仍从随机初始化开始，自训词表另设实验。
+
+**为什么还要验证集？** 若只看训练 loss，模型记住训练内容也可能表现很好。文档先按正文哈希分开，验证内容不用于更新参数。类似网页仍可能有近重复，因此结论范围有限。
+
+**为什么暂停 100 步再恢复？** 长任务会中断。只会保存权重还不够，恢复要匹配数据指纹、optimizer、随机状态与学习率计划。暂停不能把原本 3052 步的 schedule 缩成 100 步。
+
+**实际结论。** 历史运行完成 3052 次更新、99,999,744 输入 token，验证 loss=4.153138；加载和生成通过，但回复仍重复且不连贯。证明的是流程可用和当前验证上的学习进展。
+
+**下一步。** 在固定数据上调整 99M 的学习率，再看 warmup。详细原始表格在下方；入门先读 [基线说明](../../../docs/02_reproduction.md)。
+
+<details>
+<summary>查看原始完整记录：参数、复现命令、指标与生成样例</summary>
+
 ## 目的与范围
 
 从随机初始化开始，跑通真实语料的数据准备、单卡训练、独立验证和 checkpoint
@@ -422,3 +445,5 @@ checkpoint 和事件日志按现有规则留在本地：
 - [PyTorch 2.5.1 AMP examples](https://github.com/pytorch/pytorch/blob/v2.5.1/docs/source/notes/amp_examples.rst)：autocast 范围、梯度累积以及裁剪时机。
 - [PyTorch：学习率调度](https://docs.pytorch.org/docs/stable/optim.html#how-to-adjust-learning-rate)：先执行 optimizer.step，再执行 scheduler.step。
 - [PyTorch：序列化](https://docs.pytorch.org/docs/stable/notes/serialization.html)：保存 state_dict，使用受限的 weights_only 加载；本脚本在 PyTorch 2.5.1 上显式传入该参数。
+
+</details>

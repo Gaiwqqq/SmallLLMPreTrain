@@ -1,58 +1,71 @@
-# 数据与 Tokenizer
+# 数据与 Tokenizer：模型学什么，先由数据决定
 
-## 本阶段学什么
+模型不会直接读取“文章”，它读取整数序列。这个阶段把原始文本变成可信的训练输入，并尽量避免模型在训练时已经看过验证答案。
 
-先隔离文档，再编码成训练序列。
+## 为什么选择三类文本？
 
-## 输入与阶段成果
+| 来源 | token 配比 | 预期作用 | 尚未证明的部分 |
+|---|---:|---|---|
+| FineWeb-Edu | 70% | 提供较广的英文文本与教育性内容 | 不保证每篇正确或适合聊天 |
+| Cosmopedia-v2 | 25% | 增加解释性、合成的学习材料 | 合成文本也可能有错误 |
+| TinyStories | 5% | 补充简单故事和连续叙述 | 不证明 5% 是最优比例 |
 
-原始文件 manifest、去重统计、自训 32K BPE、训练/验证/测试二进制分片。
+比例按 **token 数** 计算，而不是文件数或文章数。十篇很短的故事不一定比一篇长文章贡献更多训练内容。这套比例是首轮假设；本轮没有做“移除某个来源”的消融实验，所以不能把能力变化归功于其中一个来源。
 
-## 设计与可执行步骤
+## 从原始文件到模型输入
 
-预训练按实际 token 混合：FineWeb-Edu 70%、Cosmopedia-v2 25%、TinyStories 5%。前者提供通用英文，后两者补充解释性文字和简单连贯故事；比例是本轮实验假设。
+1. **下载并记录来源。** 保存固定 revision、文件大小、SHA-256 和数据卡许可。revision 是数据仓库某个版本，避免复现时读到后来更新的内容。
+2. **清洗。** 统一 Unicode/空白、去除空字符，过滤太短、太长或高度重复的文本。这是轻量规则，不是完整质量或语言识别器。
+3. **先去重，再划分。** 完全相同正文用 SHA-256 去重；相似正文用采样五词片段的 MinHashLSH 做近似过滤，三个来源共享范围。
+4. **分训练、验证、测试文档。** 正文指纹加 seed 确定归属，约 99%/0.5%/0.5%。一篇文档先确定 split，再编码，不能先切 token 后随机分给三套数据。
+5. **只用训练文档自训 BPE。** 本次从三个来源均衡取样，共 99,999 篇，建立 32K 词表。均衡取样是为了避免词表几乎由第一个来源决定；它与正式训练的 70/25/5 配比是两件事。
+6. **编码和 packing。** 每篇末尾加 EOS，按来源配额拼成长度 2048 的序列，写入 uint16 文件。
 
-```bash
-dummym-download --repo HuggingFaceFW/fineweb-edu --prefix data/ \
-  --files 24 --output ../data/raw/fineweb
-dummym-download --repo HuggingFaceTB/smollm-corpus --prefix cosmopedia-v2/ \
-  --files 16 --output ../data/raw/cosmopedia
-dummym-download --repo roneneldan/TinyStories --prefix data/train- \
-  --files 0 --output ../data/raw/tinystories
-dummym-clean --source fineweb=../data/raw/fineweb \
-  --source cosmopedia=../data/raw/cosmopedia --source tinystories=../data/raw/tinystories \
-  --output ../data/clean/english
-dummym-tokenizer --input ../data/clean/english/fineweb.train.jsonl \
-  ../data/clean/english/cosmopedia.train.jsonl ../data/clean/english/tinystories.train.jsonl \
-  --output ../data/tokenizer/english32k
-dummym-pack --clean ../data/clean/english \
-  --tokenizer ../data/tokenizer/english32k/tokenizer.json \
-  --train-tokens 10000000000 --output ../data/tokenized/english10b
-```
+近似去重会漏掉重复，也可能误删不同文档。它降低风险，但不证明所有语义重叠都已消除。这里没有做同一网站的整体隔离，也没有声称检测了全部 benchmark 污染。
 
-下载记录不可变 revision 和 SHA-256。正文轻量规范化后精确去重，并用采样五词 shingle 的 MinHashLSH 做近重复过滤；它有误检和漏检，README 必须说明。不同来源共享去重范围，近重复过滤发生在 split 之前。
+## BPE 与特殊 token 为什么需要单独说明？
 
-通过正文哈希划分文档，train/validation/test 约 99/0.5/0.5%。BPE 只看训练文档。预留 BOS/EOS/PAD 和聊天 token，编码追加 EOS，分别 packing 成 2048 长度的 uint16 序列。模型内部执行 label shift。
+ByteLevel BPE 先以字节为基础，再合并常见片段，可以表示未见过的字符组合。词表中预留 `<unk>`、BOS、EOS、PAD、对话开始和结束标记。本项目对应 ID 为 0～5。
 
-验收：split 无精确重叠；词表 32K；特殊 token ID 正确；round-trip、ID 范围、尺寸、来源配额与指纹通过。语料不足时报错，绝不悄悄重复文档凑预算。
+EOS 表示文章结束；PAD 是补齐标记；聊天标记用于区分用户和 assistant。预训练正文不自动添加 BOS，在文档末尾添加 EOS。模型内部完成下一 token 标签错位。
 
-本次 pilot 的初始验证预算为 1M，其中 FineWeb 配额约 700K；但实际清洗后只有约 473K 验证 token，因此首次 packing 正确拒绝了该预算。现先用自训 Tokenizer 精确测量各来源的 validation/test 容量，再选择可同时满足 70/25/5 配比的预算，并保留 5% 余量；失败目录保存在 data/failed 下。相关配额与未完成标记测试已通过。
+换 Tokenizer 后，同一个整数 ID 可能代表另一段文字。旧模型的 embedding 已经为旧 ID 学了含义，不能把新词表直接套进去继续当作同一个实验。因此 213M 重新随机初始化。
 
-文档哈希比例不等于 token 比例。更换 Tokenizer 后，验证 loss/perplexity 也不能直接与原 Mistral Tokenizer 阶段比较；跨模型结论需要相同编码和评测条件。
+packing 把多篇短文拼到一个 2048 长度序列，减少 padding 浪费。本轮使用普通 causal attention，后面的文档可以看到同一序列前面的文档；我们没有实现文档间 attention 隔离。这是明确保留的简化。
 
-## 本次结果
+## 为什么最终预算是 77 亿，而不是计划上限 200 亿？
 
-已清洗 pilot 三个来源，分别最多接受 100,000 文档；自训 32K ByteLevel BPE 与约 100M token 混合 pilot 已生成。所选原始分片全部下载完成：FineWeb-Edu 24 个、Cosmopedia-v2 16 个、TinyStories 4 个。正在执行完整清洗，最终规模将由清洗后的唯一 token 容量决定。实测证据见 [运行记录](results.md)。
+清洗后，用实际自训 Tokenizer 精确统计训练容量：
 
-实际 pilot 审计已通过：300,000 个文档的内容哈希与分割规则一致，不同来源和 split 间没有完全重复文档；英文、中文、重音字符、emoji 和空白往返保持原文，六个特殊 token 的 ID 及 assistant-only 监督边界符合模型约定。该检查不证明语义近重复已全部消除。
+| 来源 | 唯一训练 token | 除以配比后可支撑的总预算 |
+|---|---:|---:|
+| FineWeb-Edu | 15,590,143,961 | 约 222.7 亿 |
+| Cosmopedia-v2 | 4,235,665,612 | 约 169.4 亿 |
+| TinyStories | 389,522,988 | 约 77.9 亿 |
+
+例如，总预算若为 100 亿，5% 的 TinyStories 就需要 5 亿 token，超过现有 3.895 亿。即使另外两个来源还有很多文本，也无法满足原定比例。
+
+因此取三个“容量 ÷ 比例”的最小值，再向下取整到一亿：选择 **77 亿**。配额按 2048 对齐后，实际训练输入为 **7,699,996,672 token**。这是唯一数据容量决定的上限，不是 GPU 算不动，也不是原先保证要训练 200 亿。
+
+可以补充 TinyStories、改变比例或重复数据，但那是不同实验选择。本轮选择保持比例、不重复样本，让预算解释清楚。
+
+## 一次真实失败教会了什么？
+
+pilot 最初想打包 1M 验证 token，其中 FineWeb 要约 700K；实际该来源验证容量只有约 473K，于是脚本拒绝预算。99% 的文档划分不能保证验证 token 容量达到指定值，因为文档长短不同。
+
+修正：先精确数各来源的 validation/test token，取共同满足配比的预算，再留 5% 余量。失败目录保留在 `data/failed/`，没有偷偷重复验证文章。完整语料验证/测试各实际打包 9,496,576 token。
+
+## 本阶段成果与检查入口
+
+原始分片 24/16/4 均下载完成；全量清洗、容量统计和正式 packing 已完成。pilot 的 300,000 文档审计通过：指纹、分割及跨来源精确去重一致；字符往返、特殊 ID 和 assistant 监督边界通过。pilot 审计不应被描述成对全量数千万文档的同一份审计。
 
 ```bash
 python scripts/data/audit_pilot.py \
   --clean "$PRETRAIN_ROOT/data/clean/pilot" \
   --tokenizer "$PRETRAIN_ROOT/data/tokenizer/english32k" \
-  --output "$PRETRAIN_ROOT/runs/pilot-audit.json"
+  --output "$PRETRAIN_ROOT/runs/pilot-audit-new.json"
 ```
 
-## 下一步
+源码阅读顺序：`data/acquisition.py → corpus.py → tokenizer/train.py → data/packing.py → packed.py`。实测清单是 `data/capacities.json` 和 `data/tokenized/english/summary.json`，远程路径都在指定根目录。
 
-按根 README 的学习顺序进入下一阶段；未通过验收先定位原因。
+阶段结论：输入可追踪、配额可满足，具备正式训练条件。是否“好数据”仍需后续模型表现与进一步对照验证。不同 Tokenizer 的 loss/PPL 不直接比较。下一页看 [四卡怎样保证算对](04_distributed.md)。

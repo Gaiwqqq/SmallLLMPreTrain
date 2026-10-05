@@ -1,39 +1,60 @@
-# 分布式与性能
+# 分布式与性能：先算对，再算快
 
-## 本阶段学什么
+一张 GPU 能放下当前小模型，为什么仍用四张？目标是让多张卡分担数据计算，并学习可验证的分布式训练。多卡不保证一定按卡数倍增速度，通信、batch 和保存都可能影响收益。
 
-相同全局 batch，验证同步与恢复。
+## DDP 实际在做什么？
 
-## 输入与阶段成果
+每张卡放一份完整模型，拿不同的数据计算梯度，再把梯度合并，让四份模型做相同的参数更新。一个进程对应一个 rank，rank 0 负责共享日志和 checkpoint。
 
-单/双/四卡对照、尾部测试、恢复报告、吞吐和显存表。
+固定同一个 global batch，才容易比较单卡和四卡。例如：
 
-## 设计与可执行步骤
+- 单卡：每次 16 条，累积 16 次，共 256 条/更新。
+- 四卡：每卡每次 16 条，累积 4 次，共 `4×16×4=256` 条/更新。
 
-先读 training/distributed.py，再读 recipe.py 和 engine.py。全局 batch=world_size × micro_batch × accumulation；例：4 卡 × 每卡 8 条 × 累积 8 次=256 条。
+卡更多时每卡要做的工作更少；若同时把 global batch 也增大，训练条件就变了，不再只是测多卡加速。
 
-DDP 会平均各 rank 的梯度。局部 micro-batch loss 需乘 world_size × local_count/global_count。尾部不足时仍保持相同 collective 顺序；没有样本的 rank 用零权重 dummy forward，防止挂起，不计入训练 token。
+## 为什么最后一个 batch 容易出错？
+
+数据量未必整除 batch。假设一个 rank 有 3 条，平均 loss=2；另一个只有 1 条，平均 loss=6。真正的整体均值是 `(3×2+1×6)/4=3`，简单平均两个 rank 的均值却是 4。
+
+DDP 默认平均梯度，所以本项目按真实样本数量给局部 loss 加权，累积之后对应一次全局平均更新。没有样本的 rank 也执行零权重 dummy forward，保持同步调用顺序，但不把 dummy 算作真实训练 token。
+
+否则，轻则最后几条数据权重错误，重则有的进程等待同步、有的已经退出，程序挂住。验证也必须统计真实条数，不靠重复补齐来凑均分。
+
+## 我们为什么做四项正确性实验？
+
+| 实验 | 设计 | 实际结果 | 能说明什么 |
+|---|---|---|---|
+| FP32 更新对照 | 同一初始化、同一全局数据，比较单卡与四卡一次更新，包含空 rank 尾部 | 最大参数差异约 9e-8 | 当前同步与加权在容限内一致 |
+| BF16 断点恢复 | 连续训练与中断恢复对照，加入 dropout=0.1 和不均匀尾部 | RNG 一致，参数最大差异 2.91e-11 | 当前完整恢复链路可复现后续训练 |
+| HF 导出对照 | 同一权重映射前后比较 logits、loss 和梯度 | 通过 | 转换格式没有改变受测数学行为 |
+| FSDP2 教学对照 | 用分片模型与完整模型比较 FP32 SGD 更新 | 差异 1.86e-9 | 理解并检查分片接口，未证明它更快 |
+
+浮点数加法顺序会影响末位数字，所以预先规定误差容限，而不是要求所有设备逐位相同。容限不能因为一次失败而临时放宽。
+
+恢复不仅需要权重，还需要 AdamW 状态、学习率调度进度、数据游标和每个 rank 的 RNG。只重新设 seed 会回到随机过程起点，不会自动回到中断处。恢复要求匹配数据指纹、配置和 world size。
+
+FSDP2 测试中，教学模型返回 dataclass，分片反向钩子需要能遍历的 Tensor 输出，因此用 LossModel 适配层返回 loss Tensor。我们调整了接口表达，没有改模型公式。
+
+## 性能实验为什么扫 micro-batch？
+
+显存有余量不等于速度最好。batch 太小可能让 GPU 工作不足；太大可能占满显存或变慢。因此保持 global batch=256，实测 micro-batch=4/8/16/32/64，再测单/双/四卡，选择有显存余量的配置。
+
+本次 213M 四卡 eager 合成数据结果：micro-batch=16，约 **217,856 输入 token/s**，每卡峰值 PyTorch allocated 显存约 **44.70 GiB**。这不包含所有驱动占用，也不包含完整下载、验证、保存和上传时间。
+
+合成数据用于测量计算速度，不是语言学习证据。运行预算还要给实际 I/O 和验证留余量；正式训练日志中每步约 21.8 万 token/s 是另一个实测口径。
+
+`torch.compile` 尝试提前优化计算图。我们先检查输出一致性，再要求稳态吞吐至少提高 10% 才启用。本次有 12 个 logits 超出既定容限，故保留 eager（普通执行）。不能由此断言 compile 对所有模型都不正确，只能说这一配置未通过我们的验收。
+
+## 阅读入口与阶段结论
+
+源码依次看 `training/distributed.py → recipe.py → engine.py`，检查程序位于 `scripts/train/verify_distributed.py`、`check_ddp_resume.py`、`verify_fsdp.py` 和 `benchmark.py`。
+
+可先做 CPU/小模型检查：
 
 ```bash
 pytest tests/unit/training -q
 pytest tests/integration -q
-python -m torch.distributed.run --standalone --nproc_per_node=4 --no-python \
-  "$PRETRAIN_ROOT/envs/train/bin/dummym-pretrain" \
-  --model-config configs/model/p099m.yaml --data-dir ../data/tokenized/reference100m \
-  --output-dir ../runs/m03_ddp --total-tokens 99999744 \
-  --global-batch-size 16 --micro-batch-size 4 --learning-rate 1e-3
 ```
 
-验证在原模型上独立前向，最后聚合指标，避免不同 rank 验证条数不同导致 DDP forward collective 不匹配。checkpoint 保存各 rank RNG 和全局游标；恢复要求相同 world size、数据内容和 recipe。
-
-吞吐按所有 rank 的实际 token 和同步墙钟时间计算。比较 micro-batch=4/8/16/32/64；global batch 固定为 256。torch.compile 正确性通过且稳态吞吐至少提高 10% 才启用。小模型单卡可放下，DDP 是正式路线；FSDP2 对照用于理解分片的通信与显存代价。
-
-FSDP2 对照见 `scripts/train/verify_fsdp.py`。教学模型返回 dataclass；分片反向钩子需要可遍历的 Tensor 输出，因此这里用显式 LossModel 适配层返回 loss Tensor。此适配不修改模型数学，也不改变原单卡/DDP 接口。
-
-## 本次结果
-
-四卡 DDP 更新、BF16 断点恢复和 FSDP2 教学对照通过。213M 四卡 eager 合成数据吞吐约 217,856 token/s，micro-batch=16、每卡峰值约 44.70 GiB。torch.compile 对照有 12 个 logits 超出事先规定的误差，因此自动保留已验证的 eager 路线，没有放宽阈值。 实测证据见 [运行记录](results.md)。
-
-## 下一步
-
-按根 README 的学习顺序进入下一阶段；未通过验收先定位原因。
+阶段结论：当前四卡 DDP 更新、尾部与恢复通过，正式路线使用 DDP + BF16 计算 + FP32 参数，micro-batch=16，保留 eager。FSDP2 用于教学，不因为“更复杂”就替换正式路线。下一步 [冻结正式训练预算](05_pretraining.md)。

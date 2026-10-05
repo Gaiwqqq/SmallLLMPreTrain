@@ -1,5 +1,9 @@
 # Inference
 
+## 怎样选择入口
+
+历史 M0/M1 的单文件 `.pt` 用下面的教学脚本。正式 Base/Chat 先导出成 HF 目录，再按 [评测与推理阶段](../../../docs/07_evaluation_inference.md) 使用成熟推理工具。Base 接收普通文本续写，Chat 接收角色模板；两者不能仅靠换个提示词就等价。
+
 ## 已训练 checkpoint
 
 `scripts/inference/pretrained_checkpoint_demo.py` 是通用的 checkpoint 生成入口。
@@ -38,22 +42,4 @@ checkpoint，未来的 FSDP 分片 checkpoint 需要先合并或使用相应的�
 
 ## 随机权重冒烟测试
 
-`generation.py` contains a deliberately simple autoregressive loop. It
-recomputes the full prompt at every step and is intended for correctness tests,
-not serving performance.
-
-Run the random-weight end-to-end demo from the project root:
-
-```bash
-conda activate dummym
-python scripts/inference/random_prompt_demo.py \
-  "你好，请介绍一下你自己。" \
-  --tokenizer /path/to/tokenizer.json \
-  --max-new-tokens 24 \
-  --seed 2026
-```
-
-Only the tokenizer is loaded; model code and weights from that model are not
-loaded. Since the miniLLaMA weights are random, generated text is expected to be
-meaningless. The purpose is to validate prompt encoding, model forward,
-autoregressive sampling, and decoding as one complete pipeline.
+`generation.py` 使用易读的逐 token 循环，每步重新计算整个前缀，方便检查编码、forward、采样与解码。随机权重生成无意义文字是预期现象；跑通接口不代表已经学会语言。正式推理与 vLLM 的条件、验证步骤见上述阶段说明。

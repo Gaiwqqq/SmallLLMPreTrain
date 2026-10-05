@@ -1,37 +1,56 @@
-# 基线复现
+# 基线复现：一次只回答一个问题
 
-## 本阶段学什么
+基础链路跑通后，我们开始用真实文章训练。这个阶段的重点是学会做公平对照，先不要求模型成为聊天助手。
 
-用相同预算对照历史实验。
+## 为什么先从 39M 开始？
 
-## 输入与阶段成果
+39M 是约 3900 万参数的小模型，调试和重跑成本较低。我们要验证完整的数据读取、独立验证、保存和恢复。若直接换成更大模型，错误会更贵，也更难定位。
 
-39M/99M 的 loss 曲线、恢复结果、实际吞吐和差异说明。
+本轮继续使用现成 Mistral 32K Tokenizer，模型权重随机初始化。这样与历史实验保持相近条件；自训编码器与三来源语料留给后续 213M 阶段。
 
-## 设计与可执行步骤
+训练集用于更新参数，验证集只用于观察模型对未参与更新文档的预测能力。最终 loss 不应拿训练集反复背诵的结果代替。
 
-先下载 FineWeb-Edu 分片，将原 Mistral tokenizer.json 放到本项目 data/reference_tokenizer/，不得使用预训练模型权重。
+## 三个实验的逻辑
+
+| 实验 | 要回答什么 | 改变什么 | 保持什么 |
+|---|---|---|---|
+| 39M 基线 | 真实语料训练与恢复是否可用？ | 从 M0 固定小 batch 换到真实文档 | 模型实现和预测下一 token 的目标 |
+| 99M 学习率对照 | 同样预算下哪档 LR 更合适？ | LR，随后换 seed 复核 | 99M 架构、数据、Tokenizer、batch 和更新预算 |
+| 99M warmup 对照 | 开头更缓慢升温是否改善最终验证？ | warmup=100/300 | 峰值 LR=1e-3，按同一 seed 配对 |
+
+学习率可以理解为更新幅度的主要旋钮：太小可能来不及学，太大可能跳过合适区域。warmup 从较小 LR 起步，让最初几次更新渐进增大。延长 warmup 同时缩短了后面的衰减阶段，因此不能把所有收益都解释成“初期更稳定”。
+
+seed 控制初始化和数据排列。先用同一 seed 比较 LR，再换一个 seed 看排序是否一致，可减少“这次刚好运气好”的误判。但两个 seed 仍不是充分的统计证明。
+
+## 本次结果怎样读？
+
+39M 读取 99,999,744 token，验证 loss 从 10.472692 降到 4.219103。训练链路、完整验证与最终保存通过，尚未说明聊天能力。
+
+99M 六组复现实测如下，数字越低越好：
+
+| LR | warmup 更新数 | seed 2026 | seed 2027 |
+|---|---:|---:|---:|
+| 6e-4 | 100 | 3.769134 | 3.758341 |
+| 1e-3 | 100 | 3.725739 | 3.704958 |
+| 1e-3 | 300 | 3.664364 | 3.647846 |
+
+在两个 seed 中，1e-3 优于 6e-4；固定 1e-3 后，300 步 warmup 优于 100 步。**这是当前 99M、当前数据和约 100M token 下的基线选择。** 不能直接搬给 213M，更不能把这里的 loss 与自训 Tokenizer 的 loss 作大小排名。
+
+历史 39M 的验证 loss 是 4.153138，本次是 4.219103。本次抽样分片和环境不同，复现不是逐位重现历史数字。原始历史记录保留在 `experiments/m00_*`、`m01_*`、`m02_*`；本次数据见 [运行记录](results.md)。
+
+## 如何复现而不覆盖正在运行的任务？
+
+先阅读 `scripts/remote/reproduce.py`：它列出了各个 LR/seed 的命令，每个任务占一张卡。在已经准备好的 reference100m 上做新短跑示例：
 
 ```bash
-python scripts/data/prepare_fineweb.py \
-  --input-dir ../data/raw/fineweb --tokenizer ../data/reference_tokenizer/tokenizer.json \
-  --output-dir ../data/tokenized/reference100m
 python scripts/train/pretrain.py \
-  --data-dir ../data/tokenized/reference100m --device cuda \
-  --output-dir ../runs/m01_39m --stop-after-steps 100
+  --data-dir "$PRETRAIN_ROOT/data/tokenized/reference100m" --device cuda \
+  --output-dir "$PRETRAIN_ROOT/runs/m01_new_baseline" --stop-after-steps 100
 python scripts/train/pretrain.py \
-  --data-dir ../data/tokenized/reference100m --device cuda \
-  --resume ../runs/m01_39m/checkpoint.pt
+  --data-dir "$PRETRAIN_ROOT/data/tokenized/reference100m" --device cuda \
+  --resume "$PRETRAIN_ROOT/runs/m01_new_baseline/checkpoint.pt"
 ```
 
-99M 使用 configs/model/p099m.yaml。原项目选定 LR=1e-3、warmup=300；复核 6e-4 与 1e-3 的两个 seed，再固定 LR 对比 warmup=100/300。独立实验各占一张卡，不互相抢显存。
+停止在 100 步只改变暂停点，不把完整学习率计划缩成 100 步。否则恢复后就不是原来的实验。
 
-本次原始分片可能与历史分片不同，验证 loss 不要求完全相同。记录数据指纹、版本与 seed 后再解释差异。旧报告位于 experiments/m01_pretraining、m02_recipe。
-
-## 本次结果
-
-39M 与六组 99M 均完成约 100M token 训练。39M 验证 loss 为 4.219103；99M 最好一组为 3.647846。两组 seed 均支持 LR=1e-3、warmup=300；详细表格和曲线见运行记录。 实测证据见 [运行记录](results.md)。
-
-## 下一步
-
-按根 README 的学习顺序进入下一阶段；未通过验收先定位原因。
+阶段成果是基线曲线、配对对照和可恢复产物。下一步先验证多卡是否算得对，再测速度；放大正式训练前再对新的 213M 配置单独选 LR。

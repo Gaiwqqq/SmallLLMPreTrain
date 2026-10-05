@@ -1,11 +1,7 @@
-# Ladder v001
+# 模型规模草案 v001
 
-`p039m.yaml` now contains the complete M1 architecture (38,937,088 parameters).
-`scripts/train/pretrain.py` reads its `model_config` directly, without recursive
-YAML inheritance. Training settings stay in command-line arguments.
+`p039m.yaml` 是已运行的 M1 架构，38,937,088 参数。`scripts/train/pretrain.py` 直接读取其中的 `model_config`，不递归继承 YAML；训练参数在命令行记录。
 
-The larger target remains a placeholder. This directory does not yet represent
-a validated scaling ladder.
+“模型阶梯”原本用于研究规模增加后 loss 如何变化。当前这里只验证了小模型，较大条目仍是占位草案，不能据此画 scaling law 或断言规模翻倍带来多少提升。可比较的规模实验还需要统一 Tokenizer、数据分布、训练预算和评测方法。
 
-Create `../v002/` instead of editing this ladder after comparable training runs
-have begun.
+已开始可比实验的配置应保留；新结构放入 `../v002/`，避免旧报告指向被修改的结构。本轮正式 213M 配置独立位于 `../../p213m.yaml`。

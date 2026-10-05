@@ -52,24 +52,41 @@ def initialize_repository(root: Path, api: HubApi) -> str:
     return repo_id
 
 
+def learning_files(repo: Path) -> list[Path]:
+    """显式选择教学材料与其链接源码，排除环境、数据、凭据及运行产物。"""
+    files = [repo / "README.md", repo / "pyproject.toml"]
+    extensions = {
+        "docs": {".md", ".png"},
+        "experiments": {".md"},
+        "configs": {".md", ".yaml"},
+        "src": {".md", ".py"},
+        "scripts": {".py", ".sh"},
+        "tests": {".py"},
+        "evaluation": {".md", ".json", ".jsonl"},
+        "data": {".md"},
+    }
+    for directory, suffixes in extensions.items():
+        files.extend(
+            path
+            for path in (repo / directory).rglob("*")
+            if path.is_file()
+            and path.suffix in suffixes
+            and not any(part.startswith(".") for part in path.relative_to(repo).parts)
+        )
+    return sorted(path for path in files if path.is_file())
+
+
 def synchronize_docs(root: Path, repo_id: str, api: HubApi) -> None:
     repo = root / "repo"
-    api.upload_file(
-        repo_id=repo_id,
-        repo_type="model",
-        path_or_fileobj=repo / "README.md",
-        path_in_repo="README.md",
-        commit_message="Update learning roadmap and run status",
-    )
     api.upload_folder(
         repo_id=repo_id,
         repo_type="model",
-        folder_path=repo / "docs",
-        path_in_repo="docs",
-        allow_patterns=["*.md", "figures/*.png"],
-        commit_message="Synchronize phase learning guides",
+        folder_path=repo,
+        path_in_repo="",
+        allow_patterns=[path.relative_to(repo).as_posix() for path in learning_files(repo)],
+        commit_message="Synchronize beginner guides, experiment explanations and linked code",
         disable_tqdm=True,
-        # 文档很小；禁用 SDK 的目录内追踪文件，避免污染源码树。
+        # 禁用目录内追踪文件，避免污染源码树；只上传上面的明确白名单。
         use_cache=False,
     )
 
@@ -176,18 +193,20 @@ def main() -> None:
         )
     while True:
         if args.docs:
-            document_files = [
-                args.root / "repo/README.md",
-                *sorted((args.root / "repo/docs").glob("*.md")),
-                *sorted((args.root / "repo/docs/figures").glob("*.png")),
-            ]
+            document_files = learning_files(args.root / "repo")
             fingerprint = hashlib.sha256(
-                b"".join(path.read_bytes() for path in document_files)
+                b"".join(
+                    path.relative_to(args.root / "repo").as_posix().encode()
+                    + b"\0"
+                    + path.read_bytes()
+                    for path in document_files
+                )
             ).hexdigest()
             if fingerprint != docs_fingerprint:
                 try:
                     synchronize_docs(args.root, repo_id, api)
                     docs_fingerprint = fingerprint
+                    print("Synchronized learning guides and linked code", flush=True)
                 except Exception as error:
                     print(f"Documentation upload failed: {type(error).__name__}", flush=True)
                     if not args.watch:

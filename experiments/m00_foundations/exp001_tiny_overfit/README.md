@@ -1,5 +1,26 @@
 # M0：Tiny Corpus Overfit
 
+<!-- BEGINNER_GUIDE -->
+
+## 初学者导读：先让模型背下来，检查学习链路
+
+**这是保留的历史报告。** 本次远程结果请读 [运行记录](../../../docs/results.md)，术语见 [术语表](../../../docs/glossary.md)。
+
+**为什么做？** 整个训练系统包含编码、输入、标签、loss、反向传播和保存。若最小数据都学不会，先修链路比扩大训练更有价值。
+
+**为什么这样设计？** 只有 16 行语料，反复读一个固定 batch，不增加陌生文本。这样把泛化难度降到很低，主要检查模型能不能记忆。使用现成 Tokenizer 也只是减少编码变量，没有加载其模型权重。
+
+**怎样判断？** 同时看 loss、下一 token 准确率和保存后重载。只看一条生成可能碰巧对；只看训练内存里的模型，无法证明保存文件可用。
+
+**实际结论。** 第 223 次更新，loss 约 0.049，next-token accuracy=100%，重载后还能还原训练内容，最小链路通过。
+
+**不能推出什么？** 模型从未经历真正陌生问题，能背训练文字不是能聊天。下一步换成真实文章，并单独留出验证文档。
+
+下面保留原始设置和结果，想复核命令时再展开。
+
+<details>
+<summary>查看原始完整记录：参数、复现命令、指标与生成样例</summary>
+
 ## 目的
 
 验证 Tokenizer、定长 packing、causal LM loss、反向传播、AdamW、
@@ -60,3 +81,5 @@ tensorboard --logdir runs/m00_tiny_overfit/tensorboard
 - 训练：`scripts/train/tiny_overfit.py`
 - checkpoint 测试：`scripts/inference/tiny_checkpoint_demo.py`
 - 本地产物：`runs/m00_tiny_overfit/`
+
+</details>

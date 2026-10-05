@@ -1,5 +1,7 @@
 # 本次运行记录
 
+这是一份实际运行台账。初学者可先读 [导读](reading_guide.md) 和 [实验说明](../experiments/README.md)，再核对这里的数值。工程测试通过说明实现可用；短训练 loss 下降说明在学习；聊天能力仍需实际回答与语义评分。三类证据不能互相替代。
+
 2026-10-04，起始 commit：a483269096538609f348cc04a0f23349edbba345。
 
 | 检查 | 本次结果 | 证据 |
@@ -55,7 +57,9 @@
 
 四卡 SFT 恢复快照接口也已实测通过并上传：`sft-interface-smoke-v4` 含模型、optimizer、scheduler、trainer_state 和四份 RNG。它使用极小合成模型，仅验证接口。最新常规测试为 39 passed（11.46s）。
 
-2026-10-05，本轮所选预训练原始分片（24/16/4）及 SFT 的 5 个分片全部下载完成；全量清洗正在进行。pilot 模型、原始续写样例和阶段指南已同步 ModelScope。正式预训练须等待唯一 token 容量统计，不能把下载字节数当作训练 token 数。
+2026-10-05，原始分片下载、全量清洗、容量统计与 packing 均已完成，四卡正式预训练已开始。训练集实际打包 7,699,996,672 输入 token，验证/测试各 9,496,576 token。70% FineWeb-Edu、25% Cosmopedia、5% TinyStories 的混合比例下，TinyStories 的唯一 token 容量限制了总预算；本轮没有为了凑更大数字而重复数据。设计解释见 [数据实验](../experiments/current/data_tokenizer/README.md) 与 [正式预训练实验](../experiments/current/pretraining/README.md)。
+
+正式训练选择学习率 3e-4、四卡 DDP、BF16 计算与 eager 模式。它仍在运行，尚无正式最终 loss 或聊天验收结论。pilot 模型和样例已同步 ModelScope。下表保留失败、修复与重试历史；过去某一阶段失败不自动表示当前训练失败。
 
 ## 自动阶段进度
 
@@ -90,3 +94,4 @@
 | m04_lr_pilot_2 | complete | /diff/gaiwq/llm_pretrain/logs/m04_lr_pilot_2.log |
 | m04_lr_pilot_3 | complete | /diff/gaiwq/llm_pretrain/logs/m04_lr_pilot_3.log |
 | pack-full-data | complete | /diff/gaiwq/llm_pretrain/logs/pack-full-data.log |
+| formal-pretraining | running | /diff/gaiwq/llm_pretrain/logs/formal-pretraining.log |

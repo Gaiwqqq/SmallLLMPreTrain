@@ -8,6 +8,8 @@
 
 ## 阅读顺序
 
+第一次接触 LLM，请先读 [初学者导读](docs/reading_guide.md)，遇到陌生词查 [术语表](docs/glossary.md)。每个实验的动机、设计、观察和结论都汇总在 [实验目录](experiments/README.md)。
+
 1. [运行与网络](docs/00_environment.md)：所有远程产物的归属、代理和环境。
 2. [模型原理](docs/01_foundations.md)：从一个 batch 读懂 Transformer。
 3. [基线复现](docs/02_reproduction.md)：先证明旧流程可以复现。
