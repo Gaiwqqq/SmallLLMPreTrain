@@ -74,7 +74,7 @@
 | pilot-capacity-cosmopedia | complete | /diff/gaiwq/llm_pretrain/logs/pilot-capacity-cosmopedia.log |
 | pilot-capacity-tinystories | complete | /diff/gaiwq/llm_pretrain/logs/pilot-capacity-tinystories.log |
 | pilot-previous-attempt | retained | Incomplete packing preserved at /diff/gaiwq/llm_pretrain/data/failed/pilot100m-1791131011 |
-| full-data-background | running | /diff/gaiwq/llm_pretrain/logs/full-data.log |
+| full-data-background | complete | Unique source capacities measured; no repeated-data budget |
 | reproduce-baselines | complete | /diff/gaiwq/llm_pretrain/logs/reproduce-baselines.log |
 | verify-ddp-resume | complete | /diff/gaiwq/llm_pretrain/logs/verify-ddp-resume.log |
 | verify-trl-sft | complete | /diff/gaiwq/llm_pretrain/logs/verify-trl-sft.log |
@@ -89,3 +89,4 @@
 | m04_lr_pilot_1 | complete | /diff/gaiwq/llm_pretrain/logs/m04_lr_pilot_1.log |
 | m04_lr_pilot_2 | complete | /diff/gaiwq/llm_pretrain/logs/m04_lr_pilot_2.log |
 | m04_lr_pilot_3 | complete | /diff/gaiwq/llm_pretrain/logs/m04_lr_pilot_3.log |
+| pack-full-data | complete | /diff/gaiwq/llm_pretrain/logs/pack-full-data.log |
