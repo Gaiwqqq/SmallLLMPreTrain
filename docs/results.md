@@ -89,3 +89,4 @@
 | m04_lr_pilot_1 | complete | /diff/gaiwq/llm_pretrain/logs/m04_lr_pilot_1.log |
 | m04_lr_pilot_2 | complete | /diff/gaiwq/llm_pretrain/logs/m04_lr_pilot_2.log |
 | m04_lr_pilot_3 | complete | /diff/gaiwq/llm_pretrain/logs/m04_lr_pilot_3.log |
+| pack-full-data | complete | /diff/gaiwq/llm_pretrain/logs/pack-full-data.log |
