@@ -78,6 +78,8 @@
 
 按预先设定的“结构失败比例，再看验证 loss”选择 1e-4；这些比例不等于语义通过率。
 
+实际生成仍有明显失败：正式 Base 在 “Water is important because” 后续写成 product development 并重复；所选短 SFT pilot 的开发题 dev-02 把 2+1 反复写成 2，却没有触发结构 flags。dev-01 也未遵守两句话限制。原始证据为 runs/base-completions.json、runs/evaluation/dev-3.jsonl。这些反例说明低 loss 和低结构失败比例都不能替代语义评分，正式模型必须独立审阅。
+
 正式 SFT 第一次在开始更新前失败。日志中 rank 0 对 451,821 条会话 tokenize 到约 96% 时已耗时 10:02，其他 rank 的单元素 ALLREDUCE 超过 600 秒等待上限，随后 watchdog 退出。证据支持预处理串行等待超过 NCCL 超时，而不是已经开始训练的梯度通信失败。长度 4434 > 2048 的告警发生在 TRL 截断之前，没有相应的模型越界 traceback；不能把它当作此次超时根因。
 
 修复将全量会话编码与截断移到独立 CPU 阶段（8 workers），生成带 input_ids、assistant_masks 的 Arrow 数据，原子提交 ready.json 并记录文件 SHA-256。训练 rank 校验后读取，使用 TRL skip_prepare_dataset=True，避免在 NCCL 等待期间处理全量文本。数据仍按完整会话去重、截断后有效 assistant 目标过滤、seed=2026 划分 1% 验证；训练/验证数量与失败前一致：451,821 / 4,564。
