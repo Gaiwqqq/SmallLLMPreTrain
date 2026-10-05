@@ -63,6 +63,27 @@
 
 截至第 1000 步，正式训练已读取 524,288,000 输入 token（约预算的 6.8%）。同一验证集 loss 从第 500 步的 4.368060 降至 3.582294；截至第 1007 步的日志 loss/梯度均有限。第 1000 步完整 checkpoint 已保存并确认含优化器、调度器和四份 RNG。这是早期学习与保存状态证据，尚不是最终模型或聊天结论。
 
+## 正式 Base 完成与 SFT 启动故障修复（2026-10-06）
+
+正式预训练已完成全部 7,699,996,672 输入 token、14,687 次更新，耗时约 10.05 小时，最终验证 loss 为 **2.640921**。Base 导出、续写检查与上传完成。这是预训练结果，聊天验收仍待完成。
+
+四组 SFT pilot（各最多 50,000 会话、一轮）与 40 项开发题生成均完成：
+
+| LR | 验证 loss | 开发题结构失败比例 |
+|---|---:|---:|
+| 1e-5 | 1.533677 | 27.5% |
+| 3e-5 | 1.457459 | 20.0% |
+| 6e-5 | 1.415538 | 27.5% |
+| 1e-4 | 1.395623 | 15.0% |
+
+按预先设定的“结构失败比例，再看验证 loss”选择 1e-4；这些比例不等于语义通过率。
+
+正式 SFT 第一次在开始更新前失败。日志中 rank 0 对 451,821 条会话 tokenize 到约 96% 时已耗时 10:02，其他 rank 的单元素 ALLREDUCE 超过 600 秒等待上限，随后 watchdog 退出。证据支持预处理串行等待超过 NCCL 超时，而不是已经开始训练的梯度通信失败。长度 4434 > 2048 的告警发生在 TRL 截断之前，没有相应的模型越界 traceback；不能把它当作此次超时根因。
+
+修复将全量会话编码与截断移到独立 CPU 阶段（8 workers），生成带 input_ids、assistant_masks 的 Arrow 数据，原子提交 ready.json 并记录文件 SHA-256。训练 rank 校验后读取，使用 TRL skip_prepare_dataset=True，避免在 NCCL 等待期间处理全量文本。数据仍按完整会话去重、截断后有效 assistant 目标过滤、seed=2026 划分 1% 验证；训练/验证数量与失败前一致：451,821 / 4,564。
+
+4 项新回归测试验证截断边界、assistant/padding loss mask、与固定 TRL 0.24.0 编码一致以及损坏文件拒绝加载。全部测试 43 passed（18.51s）；四卡 sft-interface-smoke-v5 已通过训练、验证、保存与四份 RNG 完整恢复快照。正式 SFT 已以原 LR=1e-4 重试，仍待正式结果。原失败日志保留，重试前状态另存 runs/failure-history/。
+
 ## 自动阶段进度
 
 | 阶段 | 状态 | 说明 |
@@ -75,7 +96,7 @@
 | clean-pilot | complete | /diff/gaiwq/llm_pretrain/logs/clean-pilot.log |
 | train-tokenizer | complete | /diff/gaiwq/llm_pretrain/logs/train-tokenizer.log |
 | pack-pilot | complete | /diff/gaiwq/llm_pretrain/logs/pack-pilot.log |
-| pipeline | failed | RuntimeError: pack-pilot failed with exit code 1 |
+| pipeline | running | Retry after diagnosis; previous failed stage state retained at /diff/gaiwq/llm_pretrain/runs/failure-history/attempt-1791225783.json |
 | pilot-capacity-fineweb | complete | /diff/gaiwq/llm_pretrain/logs/pilot-capacity-fineweb.log |
 | pilot-capacity-cosmopedia | complete | /diff/gaiwq/llm_pretrain/logs/pilot-capacity-cosmopedia.log |
 | pilot-capacity-tinystories | complete | /diff/gaiwq/llm_pretrain/logs/pilot-capacity-tinystories.log |
@@ -96,4 +117,18 @@
 | m04_lr_pilot_2 | complete | /diff/gaiwq/llm_pretrain/logs/m04_lr_pilot_2.log |
 | m04_lr_pilot_3 | complete | /diff/gaiwq/llm_pretrain/logs/m04_lr_pilot_3.log |
 | pack-full-data | complete | /diff/gaiwq/llm_pretrain/logs/pack-full-data.log |
-| formal-pretraining | running | /diff/gaiwq/llm_pretrain/logs/formal-pretraining.log |
+| formal-pretraining | complete | /diff/gaiwq/llm_pretrain/logs/formal-pretraining.log |
+| export-base | complete | /diff/gaiwq/llm_pretrain/logs/export-base.log |
+| base-completion-smoke | complete | /diff/gaiwq/llm_pretrain/logs/base-completion-smoke.log |
+| publish-base | complete | /diff/gaiwq/llm_pretrain/logs/publish-base.log |
+| download-sft | complete | /diff/gaiwq/llm_pretrain/logs/download-sft.log |
+| sft-pilot-0 | complete | /diff/gaiwq/llm_pretrain/logs/sft-pilot-0.log |
+| sft-pilot-1 | complete | /diff/gaiwq/llm_pretrain/logs/sft-pilot-1.log |
+| sft-pilot-2 | complete | /diff/gaiwq/llm_pretrain/logs/sft-pilot-2.log |
+| sft-pilot-3 | complete | /diff/gaiwq/llm_pretrain/logs/sft-pilot-3.log |
+| sft-dev-0 | complete | /diff/gaiwq/llm_pretrain/logs/sft-dev-0.log |
+| sft-dev-1 | complete | /diff/gaiwq/llm_pretrain/logs/sft-dev-1.log |
+| sft-dev-2 | complete | /diff/gaiwq/llm_pretrain/logs/sft-dev-2.log |
+| sft-dev-3 | complete | /diff/gaiwq/llm_pretrain/logs/sft-dev-3.log |
+| formal-sft | running | /diff/gaiwq/llm_pretrain/logs/formal-sft.log |
+| prepare-formal-sft-data | complete | /diff/gaiwq/llm_pretrain/logs/prepare-formal-sft-data.log |

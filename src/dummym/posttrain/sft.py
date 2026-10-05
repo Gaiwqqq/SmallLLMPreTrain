@@ -1,19 +1,25 @@
 """TRL 全参数 SFT：只监督 assistant 内容，原模型仍从随机权重预训练。"""
 
 import argparse
-import hashlib
 import json
 import math
 from pathlib import Path
 import shutil
 import tempfile
 
-from datasets import load_dataset
 from accelerate import PartialState
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer, TrainerCallback
 from trl import SFTConfig, SFTTrainer
 
+from dummym.posttrain.data import (
+    data_contract,
+    encode_conversation,
+    has_targets,
+    load_conversations,
+    load_prepared,
+    prepare_data,
+)
 from dummym.utils.files import write_json
 
 
@@ -83,6 +89,9 @@ def main() -> None:
         "--max-conversations", type=int, default=0, help="SFT 对照短跑规模，0 使用全部"
     )
     parser.add_argument("--resume", type=Path)
+    parser.add_argument("--prepared-data", type=Path, help="独立 CPU 阶段生成的完整 SFT 数据")
+    parser.add_argument("--prepare-only", action="store_true", help="仅在单进程中准备数据")
+    parser.add_argument("--data-workers", type=int, default=8)
     args = parser.parse_args()
     if (
         not math.isfinite(args.learning_rate)
@@ -93,40 +102,32 @@ def main() -> None:
         parser.error("Learning rate and epochs must be positive and finite")
     if args.batch_size <= 0 or args.max_conversations < 0:
         parser.error("Invalid batch size or conversation limit")
-    if args.output.exists() and args.resume is None:
+    if args.data_workers <= 0:
+        parser.error("Data workers must be positive")
+    if args.prepare_only and (args.prepared_data is None or args.resume is not None):
+        parser.error("Preparation requires --prepared-data and forbids --resume")
+    if not args.prepare_only and args.output.exists() and args.resume is None:
         raise FileExistsError(args.output)
     tokenizer = AutoTokenizer.from_pretrained(args.model, local_files_only=True)
     assert_assistant_mask(tokenizer)
     manifest = json.loads((args.data_dir / "download.json").read_text())
     if manifest["status"] != "complete":
         raise ValueError("Incomplete SFT download")
-    files = [
-        str(args.data_dir / item["path"]) for item in manifest["files"] if "/train-" in item["path"]
-    ]
-    # 按整个会话去重，不将同一会话的不同轮次拆到两个 split。
-    seen = set()
-
-    def unique(example):
-        digest = hashlib.sha256(
-            json.dumps(example["messages"], sort_keys=True).encode()
-        ).hexdigest()
-        if digest in seen:
-            return False
-        seen.add(digest)
-        return True
-
-    def has_assistant_targets(example):
-        encoded = tokenizer.apply_chat_template(
-            example["messages"], tokenize=True, return_dict=True, return_assistant_tokens_mask=True
+    if args.prepare_only:
+        # 在创建 PartialState/SFTConfig 前返回，不初始化 NCCL，也不加载模型权重。
+        prepare_data(args.data_dir, args.model, args.prepared_data, tokenizer, args.data_workers)
+        return
+    if args.prepared_data:
+        split = load_prepared(
+            args.prepared_data, data_contract(args.data_dir, args.model, tokenizer)
         )
-        # 超长 user prompt 若截断后没有 assistant 标签，会产生全忽略的 batch。
-        return any(encoded["assistant_masks"][1:2048])
-
-    with PartialState().main_process_first():
-        dataset = load_dataset("parquet", data_files=files, split="train")
-        dataset = dataset.filter(unique, load_from_cache_file=True)
-        dataset = dataset.filter(has_assistant_targets, load_from_cache_file=True)
-    split = dataset.train_test_split(test_size=0.01, seed=2026)
+    else:
+        # 小规模教学入口仍可在线准备；正式四卡任务必须使用预处理产物。
+        with PartialState().main_process_first():
+            dataset, _ = load_conversations(args.data_dir)
+            dataset = dataset.map(encode_conversation, fn_kwargs={"tokenizer": tokenizer})
+            dataset = dataset.filter(has_targets)
+        split = dataset.train_test_split(test_size=0.01, seed=2026)
     if args.max_conversations:
         split["train"] = split["train"].select(
             range(min(args.max_conversations, len(split["train"])))
@@ -148,6 +149,7 @@ def main() -> None:
         gradient_accumulation_steps=4,
         max_length=2048,
         packing=False,
+        dataset_kwargs={"skip_prepare_dataset": True},
         assistant_only_loss=True,
         bf16=True,
         warmup_ratio=0.03,

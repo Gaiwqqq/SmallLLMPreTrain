@@ -53,4 +53,12 @@ Trainer 会轮转删除旧 `checkpoint-*`。若上传还没完成，删除会破
 
 四卡 TRL 在 32 个合成会话上完成训练、验证与保存；`sft-interface-smoke-v4` 还检查了完整快照字段和四份 RNG，快照已实际上传。极小合成模型只验证接口，不代表当前 213M Chat 已训练完成。
 
-正式 SFT 在正式 Base 完成并导出后执行。阶段成果应包含 Chat 模型、模板、完整恢复点、开发对照和失败例子。下一页 [评测](07_evaluation_inference.md) 决定它是否真的能交流，进度见 [运行记录](results.md)。
+正式 Base 已完成全部 77 亿 token 并导出，四组 pilot 已完成，选择 LR=1e-4，正式 SFT 正在重试。阶段成果应包含 Chat 模型、模板、完整恢复点、开发对照和失败例子。下一页 [评测](07_evaluation_inference.md) 决定它是否真的能交流，进度见 [运行记录](results.md)。
+
+## 为什么把数据准备移到训练进程之外？
+
+第一次正式 SFT 在更新开始前遇到 NCCL 超时：TRL 先让 rank 0 tokenize 约 45 万条训练会话，其他 rank 等待；预处理耗时超过 600 秒等待上限。极小合成测试没有覆盖这个规模因素。
+
+现在单独用 CPU 准备全部 input_ids 与 assistant_masks，显式截断到 2048、过滤没有有效 assistant 预测目标的会话，再保存 Arrow 数据。ready.json 最后原子提交，包含数据、Tokenizer、模板、划分规则及文件指纹；四卡启动时只校验和读取产物。TRL 使用 skip_prepare_dataset=True，避免再次进入长预处理屏障。
+
+这不是通过延长超时掩盖问题：CPU 预处理与 GPU 同步具有不同的生命周期，应分别管理。修改仍保留原数据顺序和会话划分；真实训练/验证数量与旧流程一致。初学者可读 `posttrain/data.py`，对照 `posttrain/sft.py` 如何接收已准备数据。详细故障证据和验证见 [运行记录](results.md)。

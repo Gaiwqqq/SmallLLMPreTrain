@@ -566,6 +566,26 @@ def posttrain(workflow: Workflow):
             "criterion": "Development structural failure rate then validation loss; not a semantic acceptance claim",
         },
     )
+    prepared = ROOT / "data/tokenized/sft"
+    workflow.run(
+        "prepare-formal-sft-data",
+        cli(
+            "dummym-sft",
+            "--model",
+            ROOT / "exports/base",
+            "--data-dir",
+            data,
+            "--output",
+            ROOT / "runs/m09_sft",
+            "--prepared-data",
+            prepared,
+            "--prepare-only",
+            "--data-workers",
+            8,
+        ),
+        gpu="",
+        max_hours=2,
+    )
     output = ROOT / "runs/m09_sft"
     command = torchrun(
         4,
@@ -578,6 +598,8 @@ def posttrain(workflow: Workflow):
         output,
         "--learning-rate",
         rate,
+        "--prepared-data",
+        prepared,
     )
     checkpoints = sorted(
         output.glob("checkpoint-*"), key=lambda path: int(path.name.split("-")[-1])
@@ -714,6 +736,18 @@ def main():
     lock = (ROOT / "workflow.lock").open("w")
     fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
     workflow = Workflow(ROOT)
+    previous_failure = workflow.state["stages"].get("pipeline", {})
+    if previous_failure.get("status") == "failed":
+        history = (
+            ROOT / "runs/failure-history" / f"attempt-{int(previous_failure['updated_at'])}.json"
+        )
+        if not history.exists():
+            write_json(history, workflow.state)
+        workflow.record(
+            "pipeline",
+            "running",
+            note=f"Retry after diagnosis; previous failed stage state retained at {history}",
+        )
     worker = None
     worker_log = None
     adopted_worker_pid = None
@@ -776,6 +810,11 @@ def main():
         install_inference(workflow)
         workflow.state["status"] = "awaiting_semantic_review"
         write_json(workflow.path, workflow.state)
+        workflow.record(
+            "pipeline",
+            "awaiting_semantic_review",
+            note="Automated training and generation finished; semantic acceptance pending.",
+        )
         workflow.record(
             "first-week-delivery",
             "awaiting_semantic_review",

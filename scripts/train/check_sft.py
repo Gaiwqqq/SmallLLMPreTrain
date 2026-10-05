@@ -79,6 +79,24 @@ def main():
     (data / "data").mkdir()
     (data / "train-0.parquet").rename(data / "data/train-0.parquet")
     executable = Path(sys.executable).parent / "dummym-sft"
+    prepared = args.output / "prepared"
+    subprocess.run(
+        [
+            str(executable),
+            "--model",
+            str(model_dir),
+            "--data-dir",
+            str(data),
+            "--output",
+            str(args.output / "trained"),
+            "--prepared-data",
+            str(prepared),
+            "--prepare-only",
+            "--data-workers",
+            "1",
+        ],
+        check=True,
+    )
     subprocess.run(
         [
             sys.executable,
@@ -96,6 +114,8 @@ def main():
             str(args.output / "trained"),
             "--epochs",
             "1",
+            "--prepared-data",
+            str(prepared),
         ],
         check=True,
     )
