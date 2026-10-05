@@ -86,6 +86,8 @@
 
 4 项新回归测试验证截断边界、assistant/padding loss mask、与固定 TRL 0.24.0 编码一致以及损坏文件拒绝加载。全部测试 43 passed（18.51s）；四卡 sft-interface-smoke-v5 已通过训练、验证、保存与四份 RNG 完整恢复快照。正式 SFT 已以原 LR=1e-4 重试，仍待正式结果。原失败日志保留，重试前状态另存 runs/failure-history/。
 
+重试已通过首个真实验证与保存点：第 250 步全量验证 loss=1.511865，checkpoint-250 含模型、optimizer、scheduler、trainer_state 和四份 RNG，文件非空且 PyTorch 容器检查通过。训练继续超过第 281 步，总预算 7060 步（两轮）；这确认修复后的全量四卡任务能完成更新、验证与保存，最终语义结果仍待训练结束。
+
 ## 自动阶段进度
 
 | 阶段 | 状态 | 说明 |
