@@ -14,6 +14,7 @@ MAX_LENGTH = 2048
 
 
 def data_contract(data_dir: Path, model_dir: Path, tokenizer) -> dict:
+    manifest = json.loads((data_dir / "download.json").read_text())
     return {
         "format_version": 1,
         "source_manifest_sha256": sha256_file(data_dir / "download.json"),
@@ -21,8 +22,11 @@ def data_contract(data_dir: Path, model_dir: Path, tokenizer) -> dict:
         "chat_template": tokenizer.chat_template,
         "max_length": MAX_LENGTH,
         "split_seed": 2026,
-        "validation_fraction": 0.01,
-        "deduplication": "whole-conversation SHA256, first occurrence retained",
+        "validation_fraction": "explicit" if "split_files" in manifest else 0.01,
+        "deduplication": "reject duplicate/overlapping conversations"
+        if "split_files" in manifest
+        else "whole-conversation SHA256, first occurrence retained",
+        **({"explicit_split_files": manifest["split_files"]} if "split_files" in manifest else {}),
     }
 
 
@@ -78,8 +82,38 @@ def prepare_data(data_dir: Path, model_dir: Path, output: Path, tokenizer, worke
         load_prepared(output, contract)
         print(f"Prepared SFT data already verified: {output}", flush=True)
         return
-    dataset, manifest = load_conversations(data_dir)
-    unique_count = len(dataset)
+    manifest = json.loads((data_dir / "download.json").read_text())
+    if "split_files" in manifest:
+        if manifest["status"] != "complete" or set(manifest["split_files"]) != {"train", "test"}:
+            raise ValueError("Invalid explicit SFT splits")
+        listed = {item["path"] for item in manifest["files"]}
+        if not set(manifest["split_files"].values()) <= listed:
+            raise ValueError("Explicit split is missing its checksum")
+        for item in manifest["files"]:
+            path = (data_dir / item["path"]).resolve()
+            path.relative_to(data_dir.resolve())
+            if sha256_file(path) != item["sha256"]:
+                raise ValueError("Curriculum source checksum mismatch")
+        split = load_dataset(
+            "json",
+            data_files={key: str(data_dir / name) for key, name in manifest["split_files"].items()},
+        )
+        fingerprints = []
+        for key in ("train", "test"):
+            hashes = [
+                hashlib.sha256(json.dumps(row["messages"], sort_keys=True).encode()).hexdigest()
+                for row in split[key]
+            ]
+            if len(hashes) != len(set(hashes)):
+                raise ValueError("Duplicate curriculum conversations")
+            fingerprints.append(set(hashes))
+        if fingerprints[0] & fingerprints[1]:
+            raise ValueError("Curriculum train/validation overlap")
+        unique_count = sum(len(part) for part in split.values())
+        dataset = split
+    else:
+        dataset, manifest = load_conversations(data_dir)
+        unique_count = len(dataset)
     # 保留 messages 供 TRL 判定 conversational；collator 仅读取 token 和 mask。
     dataset = dataset.map(
         encode_conversation,
@@ -88,7 +122,12 @@ def prepare_data(data_dir: Path, model_dir: Path, output: Path, tokenizer, worke
         desc="Encode and truncate SFT conversations on CPU",
     )
     dataset = dataset.filter(has_targets, num_proc=workers)
-    split = dataset.train_test_split(test_size=0.01, seed=2026)
+    split = (
+        dataset
+        if "split_files" in manifest
+        else dataset.train_test_split(test_size=0.01, seed=2026)
+    )
+    filtered_count = sum(len(part) for part in split.values())
     output.parent.mkdir(parents=True, exist_ok=True)
     temporary = Path(tempfile.mkdtemp(prefix=f".{output.name}-", dir=output.parent))
     try:
@@ -99,7 +138,7 @@ def prepare_data(data_dir: Path, model_dir: Path, output: Path, tokenizer, worke
                 "contract": contract,
                 "source_revision": manifest["revision"],
                 "unique_conversations": unique_count,
-                "filtered_no_targets": unique_count - len(dataset),
+                "filtered_no_targets": unique_count - filtered_count,
                 "train_conversations": len(split["train"]),
                 "validation_conversations": len(split["test"]),
                 "files": {
