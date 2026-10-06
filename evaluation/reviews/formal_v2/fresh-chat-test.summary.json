@@ -1,0 +1,10 @@
+{
+  "status": "awaiting_semantic_review",
+  "model": "/diff/gaiwq/llm_pretrain/runs/sft_curriculum_v2_formal/final",
+  "cases": 120,
+  "suite_sha256": "782dfb8202273ab8db884e73e30c60ee2aea3ec9bb7d02f73f718ba59744f3a9",
+  "structural_flags": {
+    "repetition": 3
+  },
+  "note": "Structural checks do not determine factual accuracy or instruction following"
+}

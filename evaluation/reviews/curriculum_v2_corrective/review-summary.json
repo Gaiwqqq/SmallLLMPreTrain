@@ -1,0 +1,13 @@
+{
+  "passed": 10,
+  "cases": 40,
+  "pass_rate": 0.25,
+  "prediction_sha256": "dac310d63dad6560e4db087bd111a29c0c622f8092cc03aabf33c98c908bbfc6",
+  "review_method": "All 40 full responses read by Codex; not independent human validation",
+  "limitations": [
+    "Summary copies count only minimal preservation",
+    "Dev is narrow and template-heavy",
+    "Knowledge and general context still 0%"
+  ],
+  "formal_decision": "Bounded two-epoch trial from original Chat, same v2 data, LR=3e-5; no capability acceptance claim"
+}

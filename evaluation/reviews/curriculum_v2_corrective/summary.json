@@ -1,0 +1,16 @@
+{
+  "status": "complete",
+  "metrics": {
+    "train_runtime": 2201.4117,
+    "train_samples_per_second": 72.681,
+    "train_steps_per_second": 1.136,
+    "total_flos": 2.1124279081684173e+17,
+    "train_loss": 1.0655569381713867,
+    "epoch": 1.0
+  },
+  "train_conversations": 160000,
+  "validation_conversations": 600,
+  "source_revision": "curriculum-v2-20261006",
+  "learning_rate": 3e-05,
+  "validation_loss": 0.1342054158449173
+}

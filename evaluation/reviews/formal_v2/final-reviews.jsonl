@@ -1,0 +1,120 @@
+{"id": "fresh-v2-daily-01", "pass": true, "reason": "一条简短友好消息，谈邻居搬走并保持联系。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-daily-02", "pass": false, "reason": "三句，超过最多两句。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-daily-03", "pass": false, "reason": "把 rainy afternoon 说成 perfect for a sunny day，含明显情境矛盾。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-daily-04", "pass": false, "reason": "五句并擅自自称 teacher，未满足长度约束。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-daily-05", "pass": true, "reason": "一句相关安慰，承认朋友唱歌紧张并鼓励放松。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-daily-06", "pass": false, "reason": "三句建议，超过最多两句。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-daily-07", "pass": false, "reason": "没有感谢借笔，而是说以后需要笔可向自己求助。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-daily-08", "pass": false, "reason": "长信超过两句，未完成短消息。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-daily-09", "pass": false, "reason": "用不同钥匙替换没有找到的钥匙，建议与找回 misplaced key 的任务不相符。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-daily-10", "pass": false, "reason": "Hello、Welcome、host 介绍共三句，超过两句。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-daily-11", "pass": true, "reason": "一句与选择平静周末活动相关的友好信息；较泛化但满足最低相关性。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-daily-12", "pass": false, "reason": "三句且把 late reply 归因于对方，未表达自己迟回复的歉意。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-daily-13", "pass": false, "reason": "四句，超过两句。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-daily-14", "pass": false, "reason": "没有安慰输掉比赛的人，而是表示帮挑选游戏。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-daily-15", "pass": false, "reason": "宣称商店正在营业并编造时间，与说明 closed 相反。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-daily-16", "pass": false, "reason": "建议说话者自己慢慢说，而不是向朋友提出慢一点的请求。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-daily-17", "pass": false, "reason": "一般帮助宣言，没有礼貌拒绝邀请。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-daily-18", "pass": false, "reason": "四句祝贺，超过两句。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-daily-19", "pass": false, "reason": "没有给出任何 screen-free 的信息或活动，只说可以提供建议。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-daily-20", "pass": false, "reason": "继续提出合作目标，没有结束对话的表达。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-knowledge-01", "pass": false, "reason": "把蜘蛛腿数说成 20–30，正确为 8。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-knowledge-02", "pass": false, "reason": "回答 satellite，没有指出 Moon。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-knowledge-03", "pass": false, "reason": "把金符号说成 C，正确为 Au。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-knowledge-04", "pass": false, "reason": "同时说 whale 是 fish 和 mammal，存在实质矛盾。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-knowledge-05", "pass": true, "reason": "指南针用于指示方向，包含 north；表达 north/south 等方向并不违背问题。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-knowledge-06", "pass": false, "reason": "没有回答 spring 之后是 summer，改为谈 spring 之前的日期。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-knowledge-07", "pass": false, "reason": "把气态水说成 air，应为 water vapor。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-knowledge-08", "pass": false, "reason": "没有给出 100 cm。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-knowledge-09", "pass": false, "reason": "empty 的反义词仍说成 empty。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-knowledge-10", "pass": false, "reason": "child 复数仍说成 child。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-knowledge-11", "pass": false, "reason": "go 过去式仍说成 go。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-knowledge-12", "pass": false, "reason": "把首月说成 July，应为 January。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-knowledge-13", "pass": true, "reason": "knife 也是可用于切纸的常见工具；按功能接受合理替代，不仅匹配参考词 scissors。此题存在工具语境歧义。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-knowledge-14", "pass": true, "reason": "正确回答 carbon 符号 C。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-knowledge-15", "pass": false, "reason": "4×3 回答 3，应为 12。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-knowledge-16", "pass": true, "reason": "正确回答 hearing。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-knowledge-17", "pass": false, "reason": "否认 rectangle 有四边。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-knowledge-18", "pass": false, "reason": "未回答 ten，且编造 9 是 prime。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-knowledge-19", "pass": false, "reason": "幼犬说成 Kitty，应为 puppy。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-knowledge-20", "pass": false, "reason": "未回答 west，把 east 的反向与 north 混淆。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-instruction-01", "pass": false, "reason": "输出 SUNRISE，没有转换为小写 sunrise。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-instruction-02", "pass": true, "reason": "精确输出 YES。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-instruction-03", "pass": false, "reason": "无两个编号条目，还把颜色说成数字。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-instruction-04", "pass": false, "reason": "含说明、代码围栏、额外 name 键及 city=New York，违反 only JSON city=Oslo。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-instruction-05", "pass": true, "reason": "一个关于 library 的问题并以问号结束。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-instruction-06", "pass": false, "reason": "显著超过四个单词。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-instruction-07", "pass": false, "reason": "没有只输出 breeze。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-instruction-08", "pass": false, "reason": "多行编号列表和解释，不是只有三个逗号分隔颜色。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-instruction-09", "pass": false, "reason": "cat 字母数输出 1，应为 3。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-instruction-10", "pass": false, "reason": "给出两个编号条目而不是要求的 bullet points；本题按冻结格式约束严格评分，内容虽相关。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-instruction-11", "pass": false, "reason": "直接用了禁止的 hello。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-instruction-12", "pass": false, "reason": "反复使用禁止的 tall，并出现复读。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-instruction-13", "pass": false, "reason": "输出 True.，不满足精确小写 true。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-instruction-14", "pass": false, "reason": "输出编号及逆序 3/2/1，不是仅 1/2/3 分行。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-instruction-15", "pass": false, "reason": "zebra 首字母输出 WOOF，应为 Z。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-instruction-16", "pass": false, "reason": "带说明与围栏、重复 san 键对象，不是 tea/milk 的 JSON array。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-instruction-17", "pass": false, "reason": "没有任何 bullet 标记。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-instruction-18", "pass": true, "reason": "精确输出 Good evening。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-instruction-19", "pass": false, "reason": "说老师夸学生，没有向老师表达感谢。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-instruction-20", "pass": false, "reason": "输出全部 book lamp chair，没有只输出 lamp。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-rewrite-01", "pass": false, "reason": "用无法访问个人数据的隐私声明替代礼貌改写，未保留原请求细节。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-rewrite-02", "pass": false, "reason": "用无法访问个人数据的隐私声明替代礼貌改写，未保留原请求细节。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-rewrite-03", "pass": false, "reason": "用无法访问个人数据的隐私声明替代礼貌改写，未保留原请求细节。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-rewrite-04", "pass": false, "reason": "用无法访问个人数据的隐私声明替代礼貌改写，未保留原请求细节。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-rewrite-05", "pass": false, "reason": "用无法访问个人数据的隐私声明替代礼貌改写，未保留原请求细节。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-rewrite-06", "pass": false, "reason": "用无法访问个人数据的隐私声明替代礼貌改写，未保留原请求细节。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-rewrite-07", "pass": true, "reason": "礼貌 please 请求保留物品、地点、星期及时间；前置友好寒暄未改动请求含义。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-rewrite-08", "pass": false, "reason": "用无法访问个人数据的隐私声明替代礼貌改写，未保留原请求细节。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-rewrite-09", "pass": false, "reason": "用无法访问个人数据的隐私声明替代礼貌改写，未保留原请求细节。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-rewrite-10", "pass": false, "reason": "用无法访问个人数据的隐私声明替代礼貌改写，未保留原请求细节。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-rewrite-11", "pass": true, "reason": "礼貌 please 请求保留物品、地点、星期及时间；前置友好寒暄未改动请求含义。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-rewrite-12", "pass": false, "reason": "用无法访问个人数据的隐私声明替代礼貌改写，未保留原请求细节。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-rewrite-13", "pass": false, "reason": "用无法访问个人数据的隐私声明替代礼貌改写，未保留原请求细节。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-rewrite-14", "pass": false, "reason": "用无法访问个人数据的隐私声明替代礼貌改写，未保留原请求细节。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-rewrite-15", "pass": false, "reason": "用无法访问个人数据的隐私声明替代礼貌改写，未保留原请求细节。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-rewrite-16", "pass": false, "reason": "用无法访问个人数据的隐私声明替代礼貌改写，未保留原请求细节。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-rewrite-17", "pass": false, "reason": "用无法访问个人数据的隐私声明替代礼貌改写，未保留原请求细节。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-rewrite-18", "pass": false, "reason": "用无法访问个人数据的隐私声明替代礼貌改写，未保留原请求细节。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-rewrite-19", "pass": true, "reason": "礼貌 please 请求保留物品、地点、星期及时间；前置友好寒暄未改动请求含义。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-rewrite-20", "pass": false, "reason": "用无法访问个人数据的隐私声明替代礼貌改写，未保留原请求细节。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-summary-01", "pass": false, "reason": "把 3 dollars 与 volunteer team 连接，不能清晰表达三美元门票费用。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-summary-02", "pass": false, "reason": "遗漏 4 dollars 入场费。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-summary-03", "pass": false, "reason": "遗漏 5 dollars 并编造 welcome package。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-summary-04", "pass": false, "reason": "编造 welcome party，把费用归于 party，未保留 entry 语义。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-summary-05", "pass": false, "reason": "编造 1,200 志愿者并把 7 dollars 改为 7.50。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-summary-06", "pass": false, "reason": "遗漏 8 dollars。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-summary-07", "pass": false, "reason": "遗漏 9 dollars，并编造刷新音响和甜点。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-summary-08", "pass": true, "reason": "单句保留 sports hall、11 a.m.、Wednesday、10-dollar entrance fee。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-summary-09", "pass": false, "reason": "遗漏 11 dollars 并改为 welcome invitation。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-summary-10", "pass": false, "reason": "遗漏 12 dollars。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-summary-11", "pass": false, "reason": "遗漏 13 dollars 并编造 package。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-summary-12", "pass": false, "reason": "把 14 dollars 改成给志愿者的 $14,500 package。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-summary-13", "pass": false, "reason": "编造 10 volunteers，并把 $15 关联 guest list 而不是入场费。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-summary-14", "pass": false, "reason": "遗漏 16 dollars。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-summary-15", "pass": false, "reason": "遗漏 17 dollars 并编造 package。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-summary-16", "pass": false, "reason": "虽写 entry $18，但又编造志愿者 package $18。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-summary-17", "pass": false, "reason": "主事实存在，但编造一百名志愿者，违反 no invented facts。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-summary-18", "pass": false, "reason": "遗漏 20 dollars。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-summary-19", "pass": false, "reason": "编造 welcome party，把 $21 与 party 关联，不是明确入场费。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-summary-20", "pass": true, "reason": "单句保留 sports hall、11 a.m.、Wednesday、22 dollars 入场费。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-context-01", "pass": false, "reason": "第二轮说 2/20，末轮改名 Kaelin 和 20；应 Keira0/21。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-context-02", "pass": false, "reason": "算 21+4=24 并最终说 48，应 Damon1/22。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-context-03", "pass": false, "reason": "一直保留旧数 22、没有正确算出 23。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-context-04", "pass": false, "reason": "相继编造 8、30、40、42，应 21。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-context-05", "pass": false, "reason": "第二轮只说 4，末轮改名 Akira Nakamura，应 Keira4/26。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-context-06", "pass": false, "reason": "保留旧数 25，应 27。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-context-07", "pass": false, "reason": "忽略原数 26，回答 4，并把收发方向改成 assistant 寄给用户，应 25。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-context-08", "pass": false, "reason": "把 5×4=20、27×4=210 当总数，应 26。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-context-09", "pass": false, "reason": "算 28+5=42、改名 Kaelin，应 Keira8/31。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-context-10", "pass": false, "reason": "虽提到正确总数 29，但同时说共有 3/还要 2 张，并把用户身份当 assistant；状态自相矛盾。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-context-11", "pass": false, "reason": "末轮提到 30，但第二轮先说用户有 4 张、改成 assistant 发给用户；不是一致的 30 张状态回忆。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-context-12", "pass": false, "reason": "第二轮说 5，末轮又说 31 和 5，状态矛盾。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-context-13", "pass": false, "reason": "32+3=32、保留旧数，应 33。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-context-14", "pass": false, "reason": "持续旧数 33 并复读，应 34。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-context-15", "pass": false, "reason": "第二轮只说 4，末轮改名 Sophia，应 Linnea14/35。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-context-16", "pass": false, "reason": "改写为 35+5=40 又添加 30，应 33。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-context-17", "pass": false, "reason": "算 2+4=5，末轮旧数 36 和额外 4，应 38。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-context-18", "pass": false, "reason": "大量复读、编造 52/26/12，应 39。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-context-19", "pass": false, "reason": "旧数 38、末轮改名 Julianne，应 Linnea18/37。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "fresh-v2-context-20", "pass": false, "reason": "39+4=47 并改名 Alessandro，应 Omar19/38。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}

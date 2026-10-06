@@ -1,0 +1,24 @@
+{
+  "reviewer": "Codex",
+  "method": "All 120 final and 40 dev complete generated responses read against frozen rubrics; LLM-assisted, not independent human validation",
+  "final_prediction_sha256": "dd315f0b956f6873c6584f63af9ef12e198f2af78e006e5142bb166c9ba518db",
+  "final_suite_sha256": "782dfb8202273ab8db884e73e30c60ee2aea3ec9bb7d02f73f718ba59744f3a9",
+  "policy": [
+    "Explicit exact casing/count/format constraints required; numbered items do not satisfy an explicit bullet requirement.",
+    "Major related factual contradictions fail even with a correct keyword.",
+    "Plausible alternative tools such as knife for paper cutting accepted; rubric not enforced by keyword alone.",
+    "Final summaries require one sentence, all stated core facts, and no invented details.",
+    "Context tasks require correct intermediate updates and consistent final state; contradictions override isolated correct numbers.",
+    "Dev remains separate and its already-short copied summaries only show minimal fact preservation."
+  ],
+  "limitations": [
+    "Daily relevance and severity have judgment variation; borderline cases need independent human re-review.",
+    "Final suite has limited repeated families, so this is not a broad benchmark.",
+    "Test has now been inspected; future development requires a new independent frozen test."
+  ],
+  "borderline_cases": [
+    "knowledge-13 knife accepted as a plausible cutting tool.",
+    "instruction-10 numbered list rejected under frozen bullet format; accepting it would add one point without affecting failed acceptance.",
+    "dev-12/dev-36 pass minimal recalled color/ticket despite irrelevant sky associations; not general factual endorsement."
+  ]
+}

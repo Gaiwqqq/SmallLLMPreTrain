@@ -1,0 +1,40 @@
+{"id": "dev-01", "pass": false, "reason": "实际回复超过两句，未满足明确两句限制。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-02", "pass": false, "reason": "没有给出 rubric 要求的正确 n+1 结果；表达式复述或错误等式不是答案。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-03", "pass": false, "reason": "虽为两个 bullet，但把水说成植物主要能量来源或描述植物消化，存在实质知识错误。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-04", "pass": false, "reason": "未完成保留原请求的礼貌改写：出现无关问候、缺失 today、把请求改成自己承诺，或附带虚假的语法修改说明。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-05", "pass": false, "reason": "遗漏次日恢复，或编造关闭原因/日期，未保留全部 rubric 事实。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-06", "pass": false, "reason": "末轮未同时准确保留 violet 和票号；答出一个数字不构成完整多轮回忆。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-07", "pass": false, "reason": "实际回复超过两句，未满足明确两句限制。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-08", "pass": false, "reason": "没有给出 rubric 要求的正确 n+1 结果；表达式复述或错误等式不是答案。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-09", "pass": false, "reason": "虽为两个 bullet，但把水说成植物主要能量来源或描述植物消化，存在实质知识错误。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-10", "pass": false, "reason": "未完成保留原请求的礼貌改写：出现无关问候、缺失 today、把请求改成自己承诺，或附带虚假的语法修改说明。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-11", "pass": false, "reason": "遗漏次日恢复，或编造关闭原因/日期，未保留全部 rubric 事实。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-12", "pass": false, "reason": "末轮未同时准确保留 violet 和票号；答出一个数字不构成完整多轮回忆。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-13", "pass": false, "reason": "实际回复超过两句，未满足明确两句限制。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-14", "pass": false, "reason": "没有给出 rubric 要求的正确 n+1 结果；表达式复述或错误等式不是答案。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-15", "pass": false, "reason": "虽为两个 bullet，但把水说成植物主要能量来源或描述植物消化，存在实质知识错误。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-16", "pass": false, "reason": "未完成保留原请求的礼貌改写：出现无关问候、缺失 today、把请求改成自己承诺，或附带虚假的语法修改说明。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-17", "pass": false, "reason": "遗漏次日恢复，或编造关闭原因/日期，未保留全部 rubric 事实。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-18", "pass": false, "reason": "末轮未同时准确保留 violet 和票号；答出一个数字不构成完整多轮回忆。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-19", "pass": false, "reason": "实际回复超过两句，未满足明确两句限制。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-20", "pass": false, "reason": "没有给出 rubric 要求的正确 n+1 结果；表达式复述或错误等式不是答案。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-21", "pass": false, "reason": "虽为两个 bullet，但把水说成植物主要能量来源或描述植物消化，存在实质知识错误。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-22", "pass": false, "reason": "未完成保留原请求的礼貌改写：出现无关问候、缺失 today、把请求改成自己承诺，或附带虚假的语法修改说明。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-23", "pass": false, "reason": "遗漏次日恢复，或编造关闭原因/日期，未保留全部 rubric 事实。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-24", "pass": false, "reason": "末轮未同时准确保留 violet 和票号；答出一个数字不构成完整多轮回忆。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-25", "pass": false, "reason": "实际回复超过两句，未满足明确两句限制。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-26", "pass": false, "reason": "没有给出 rubric 要求的正确 n+1 结果；表达式复述或错误等式不是答案。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-27", "pass": true, "reason": "复核：实际两个 bullet，包含 water，说明光合作用与温度调节；附加说明未被题目禁止，按与基线相同的最低相关性标准通过。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-28", "pass": false, "reason": "未完成保留原请求的礼貌改写：出现无关问候、缺失 today、把请求改成自己承诺，或附带虚假的语法修改说明。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-29", "pass": false, "reason": "遗漏次日恢复，或编造关闭原因/日期，未保留全部 rubric 事实。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-30", "pass": false, "reason": "末轮未同时准确保留 violet 和票号；答出一个数字不构成完整多轮回忆。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-31", "pass": false, "reason": "实际回复超过两句，未满足明确两句限制。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-32", "pass": false, "reason": "没有给出 rubric 要求的正确 n+1 结果；表达式复述或错误等式不是答案。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-33", "pass": false, "reason": "虽为两个 bullet，但把水说成植物主要能量来源或描述植物消化，存在实质知识错误。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-34", "pass": true, "reason": "保留颜色、notebook、指定 desk 编号、today，并用礼貌请求；额外自述不计为改写能力收益。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-35", "pass": false, "reason": "遗漏次日恢复，或编造关闭原因/日期，未保留全部 rubric 事实。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-36", "pass": false, "reason": "末轮未同时准确保留 violet 和票号；答出一个数字不构成完整多轮回忆。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-37", "pass": false, "reason": "实际回复超过两句，未满足明确两句限制。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-38", "pass": false, "reason": "没有给出 rubric 要求的正确 n+1 结果；表达式复述或错误等式不是答案。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-39", "pass": false, "reason": "虽为两个 bullet，但把水说成植物主要能量来源或描述植物消化，存在实质知识错误。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-40", "pass": false, "reason": "未完成保留原请求的礼貌改写：出现无关问候、缺失 today、把请求改成自己承诺，或附带虚假的语法修改说明。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}

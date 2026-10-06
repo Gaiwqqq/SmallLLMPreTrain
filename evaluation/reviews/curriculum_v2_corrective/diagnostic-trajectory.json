@@ -1,0 +1,32 @@
+{
+  "daily": {
+    "passed": 100,
+    "cases": 100,
+    "pass_rate": 1.0
+  },
+  "knowledge": {
+    "passed": 2,
+    "cases": 100,
+    "pass_rate": 0.02
+  },
+  "instruction": {
+    "passed": 77,
+    "cases": 100,
+    "pass_rate": 0.77
+  },
+  "rewrite": {
+    "passed": 7,
+    "cases": 100,
+    "pass_rate": 0.07
+  },
+  "summary": {
+    "passed": 78,
+    "cases": 100,
+    "pass_rate": 0.78
+  },
+  "context": {
+    "passed": 1,
+    "cases": 100,
+    "pass_rate": 0.01
+  }
+}

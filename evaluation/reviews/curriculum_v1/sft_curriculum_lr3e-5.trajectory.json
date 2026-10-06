@@ -1,0 +1,12 @@
+{
+  "instruction": {
+    "passed": 100,
+    "cases": 200,
+    "pass_rate": 0.5
+  },
+  "context": {
+    "passed": 0,
+    "cases": 200,
+    "pass_rate": 0.0
+  }
+}

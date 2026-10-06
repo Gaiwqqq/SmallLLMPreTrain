@@ -1,0 +1,15 @@
+{
+  "overall_pass_rate": 0.225,
+  "category_pass_rates": {
+    "daily": 0.0,
+    "knowledge": 0.0,
+    "instruction": 0.0,
+    "rewrite": 0.14285714285714285,
+    "summary": 1.0,
+    "context": 0.3333333333333333
+  },
+  "structurally_clean_rate": 0.975,
+  "accepted": false,
+  "prediction_sha256": "72b66bdc5e44838c3459f506ad4c4ad97a8e07a1092bc4242285abf25a8da1b8",
+  "reviews_sha256": "bc76303c41dcc43d91e3c5b8f936581084bf7e3fc54c4f87bfa713327bb22517"
+}

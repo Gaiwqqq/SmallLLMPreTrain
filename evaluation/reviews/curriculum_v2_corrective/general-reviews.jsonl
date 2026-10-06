@@ -1,0 +1,40 @@
+{"id": "dev-01", "pass": true, "reason": "两句相关建议，colon 后引出的短句计入第二句；有重复措辞但可理解。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-02", "pass": false, "reason": "没有给出正确的 n+1 数值；仅复述表达式或给出错误结果。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-03", "pass": true, "reason": "两个 bullet、water 存在，照护信息基本相关。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-04", "pass": false, "reason": "写成长信、改变请求主体或增加 unrelated meeting；未保留原礼貌请求的意义/全部细节。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-05", "pass": true, "reason": "保留路线编号、中午关闭、修路和次日恢复；几乎复制原文，仅计最低限度事实保留。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-06", "pass": false, "reason": "末轮未准确同时给出 violet 和票号；前面说颜色正确不等于完整状态回忆。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-07", "pass": false, "reason": "超过两句，不满足明确句数。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-08", "pass": false, "reason": "没有给出正确的 n+1 数值；仅复述表达式或给出错误结果。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-09", "pass": true, "reason": "两个 bullet、water 存在，照护信息基本相关。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-10", "pass": false, "reason": "写成长信、改变请求主体或增加 unrelated meeting；未保留原礼貌请求的意义/全部细节。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-11", "pass": true, "reason": "保留路线编号、中午关闭、修路和次日恢复；几乎复制原文，仅计最低限度事实保留。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-12", "pass": false, "reason": "末轮未准确同时给出 violet 和票号；前面说颜色正确不等于完整状态回忆。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-13", "pass": false, "reason": "超过两句，不满足明确句数。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-14", "pass": false, "reason": "没有给出正确的 n+1 数值；仅复述表达式或给出错误结果。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-15", "pass": false, "reason": "输出三个 bullet。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-16", "pass": false, "reason": "写成长信、改变请求主体或增加 unrelated meeting；未保留原礼貌请求的意义/全部细节。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-17", "pass": true, "reason": "保留路线编号、中午关闭、修路和次日恢复；几乎复制原文，仅计最低限度事实保留。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-18", "pass": false, "reason": "末轮未准确同时给出 violet 和票号；前面说颜色正确不等于完整状态回忆。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-19", "pass": false, "reason": "超过两句，不满足明确句数。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-20", "pass": false, "reason": "没有给出正确的 n+1 数值；仅复述表达式或给出错误结果。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-21", "pass": false, "reason": "输出三个 bullet。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-22", "pass": false, "reason": "写成长信、改变请求主体或增加 unrelated meeting；未保留原礼貌请求的意义/全部细节。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-23", "pass": true, "reason": "保留路线编号、中午关闭、修路和次日恢复；几乎复制原文，仅计最低限度事实保留。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-24", "pass": false, "reason": "末轮未准确同时给出 violet 和票号；前面说颜色正确不等于完整状态回忆。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-25", "pass": false, "reason": "超过两句，不满足明确句数。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-26", "pass": false, "reason": "没有给出正确的 n+1 数值；仅复述表达式或给出错误结果。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-27", "pass": true, "reason": "两个 bullet、water 存在，照护信息基本相关。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-28", "pass": false, "reason": "写成长信、改变请求主体或增加 unrelated meeting；未保留原礼貌请求的意义/全部细节。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-29", "pass": true, "reason": "保留路线编号、中午关闭、修路和次日恢复；几乎复制原文，仅计最低限度事实保留。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-30", "pass": false, "reason": "末轮未准确同时给出 violet 和票号；前面说颜色正确不等于完整状态回忆。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-31", "pass": false, "reason": "超过两句，不满足明确句数。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-32", "pass": false, "reason": "没有给出正确的 n+1 数值；仅复述表达式或给出错误结果。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-33", "pass": false, "reason": "把 fern 说成 succulent，补充照护信息含实质错误。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-34", "pass": false, "reason": "写成长信、改变请求主体或增加 unrelated meeting；未保留原礼貌请求的意义/全部细节。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-35", "pass": false, "reason": "遗漏路线编号，并把停止运行写成正在运行。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-36", "pass": false, "reason": "末轮未准确同时给出 violet 和票号；前面说颜色正确不等于完整状态回忆。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-37", "pass": false, "reason": "超过两句，不满足明确句数。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-38", "pass": false, "reason": "没有给出正确的 n+1 数值；仅复述表达式或给出错误结果。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-39", "pass": true, "reason": "两个 bullet、water 存在，照护信息基本相关。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}
+{"id": "dev-40", "pass": false, "reason": "写成长信、改变请求主体或增加 unrelated meeting；未保留原礼貌请求的意义/全部细节。", "reviewer": "Codex", "review_method": "LLM-assisted full-response rubric review"}

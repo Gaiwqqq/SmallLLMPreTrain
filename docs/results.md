@@ -88,6 +88,22 @@
 
 重试已通过首个真实验证与保存点：第 250 步全量验证 loss=1.511865，checkpoint-250 含模型、optimizer、scheduler、trainer_state 和四份 RNG，文件非空且 PyTorch 容器检查通过。训练继续超过第 281 步，总预算 7060 步（两轮）；这确认修复后的全量四卡任务能完成更新、验证与保存，最终语义结果仍待训练结束。
 
+## 课程迭代与正式训练准备（2026-10-06）
+
+v1 两组短跑已完成，课程末轮总分均 50%；补充逐任务轮次诊断发现上下文均 0%。三组一般开发题实际审阅为原 Chat 10/40、3e-5 6/40、1e-4 2/40。高学习率边界题复核修正已保留，不能把这两候选写成无退化的成功选优。
+
+v2 修正数据偏差、加入 80% 原对话回放；四卡纠正实验已完成 2,500 步，验证 loss 0.134205，一般开发 10/40，合成逐轮上下文仅 1%。随后提交正式两轮、5,000 步的后台启动命令，尚未获得可核验的当前进程/步数回执。120 项新题已冻结，不用于开发选优。完整设计和证据见 [v2 实验](../experiments/current/sft_curriculum_v2/README.md)。
+
+下方自动表为旧控制器历史快照，不能代表课程纠正或正式 v2 的当前状态。
+
+## 最终 v2 语义验收（2026-10-07）
+
+已实际核验：正式 SFT 5,000 步、两轮、160,000 训练会话，运行 4,356.8441 秒，train_loss=1.026046、课程 val_loss=0.130357。读取已生成的最终模型回复，无重复训练或重新生成。
+
+逐题审阅并远程汇总 test：15/120（12.5%），daily 15%、knowledge 20%、instruction 15%、rewrite 15%、summary 10%、context 0%；结构正常率 97.5%，accepted=false。40 dev 单独为 9/40（22.5%）。评分是 Codex 辅助且含边界判断，全部理由与输入哈希保留；不同 test 不能直接作分数趋势比较。
+
+完整结果见 [最终交付](final_delivery.md)。
+
 ## 自动阶段进度
 
 | 阶段 | 状态 | 说明 |
@@ -100,7 +116,7 @@
 | clean-pilot | complete | /diff/gaiwq/llm_pretrain/logs/clean-pilot.log |
 | train-tokenizer | complete | /diff/gaiwq/llm_pretrain/logs/train-tokenizer.log |
 | pack-pilot | complete | /diff/gaiwq/llm_pretrain/logs/pack-pilot.log |
-| pipeline | running | Retry after diagnosis; previous failed stage state retained at /diff/gaiwq/llm_pretrain/runs/failure-history/attempt-1791225783.json |
+| pipeline | awaiting_semantic_review | Automated training and generation finished; semantic acceptance pending. |
 | pilot-capacity-fineweb | complete | /diff/gaiwq/llm_pretrain/logs/pilot-capacity-fineweb.log |
 | pilot-capacity-cosmopedia | complete | /diff/gaiwq/llm_pretrain/logs/pilot-capacity-cosmopedia.log |
 | pilot-capacity-tinystories | complete | /diff/gaiwq/llm_pretrain/logs/pilot-capacity-tinystories.log |
@@ -134,5 +150,20 @@
 | sft-dev-1 | complete | /diff/gaiwq/llm_pretrain/logs/sft-dev-1.log |
 | sft-dev-2 | complete | /diff/gaiwq/llm_pretrain/logs/sft-dev-2.log |
 | sft-dev-3 | complete | /diff/gaiwq/llm_pretrain/logs/sft-dev-3.log |
-| formal-sft | running | /diff/gaiwq/llm_pretrain/logs/formal-sft.log |
+| formal-sft | complete | /diff/gaiwq/llm_pretrain/logs/formal-sft.log |
 | prepare-formal-sft-data | complete | /diff/gaiwq/llm_pretrain/logs/prepare-formal-sft-data.log |
+| publish-chat | complete | /diff/gaiwq/llm_pretrain/logs/publish-chat.log |
+| final-chat-generation | complete | /diff/gaiwq/llm_pretrain/logs/final-chat-generation.log |
+| evaluation-environment | complete | /diff/gaiwq/llm_pretrain/logs/evaluation-environment.log |
+| evaluation-torch | complete | /diff/gaiwq/llm_pretrain/logs/evaluation-torch.log |
+| evaluation-dependencies | complete | /diff/gaiwq/llm_pretrain/logs/evaluation-dependencies.log |
+| lm-eval-base | complete | /diff/gaiwq/llm_pretrain/logs/lm-eval-base.log |
+| lm-eval-chat | complete | /diff/gaiwq/llm_pretrain/logs/lm-eval-chat.log |
+| inference-environment | complete | /diff/gaiwq/llm_pretrain/logs/inference-environment.log |
+| install-vllm | complete | /diff/gaiwq/llm_pretrain/logs/install-vllm.log |
+| vllm-offline-smoke | complete | /diff/gaiwq/llm_pretrain/logs/vllm-offline-smoke.log |
+| pin-inference-tokenizer-v1 | complete | /diff/gaiwq/llm_pretrain/logs/pin-inference-tokenizer-v1.log |
+| inference-dependency-check | complete | /diff/gaiwq/llm_pretrain/logs/inference-dependency-check.log |
+| inference-tokenizer-preflight | complete | /diff/gaiwq/llm_pretrain/logs/inference-tokenizer-preflight.log |
+| vllm-service-smoke | complete | /diff/gaiwq/llm_pretrain/logs/vllm-service-smoke.log |
+| first-week-delivery | awaiting_semantic_review | Model/export/evaluation produced. Review 120 answers before declaring capability acceptance. |

@@ -1,0 +1,56 @@
+{
+  "general_review": {
+    "baseline": {
+      "passed": 10,
+      "cases": 40,
+      "pass_rate": 0.25,
+      "category_pass_rates": {
+        "context": 0.0,
+        "rewrite": 0.2857142857142857,
+        "knowledge": 0.0,
+        "instruction": 0.2857142857142857,
+        "summary": 1.0,
+        "daily": 0.0
+      },
+      "prediction_sha256": "939b3544bfe17accc905dfca2b42111117647a475a2014e308838239d72604a4",
+      "reviews_sha256": "fd550c5d94ad5a4e669bcb960fbabd803b21d57f057ed9b51823e13704416881"
+    },
+    "sft_curriculum_lr3e-5": {
+      "passed": 6,
+      "cases": 40,
+      "pass_rate": 0.15,
+      "category_pass_rates": {
+        "context": 0.0,
+        "rewrite": 0.0,
+        "knowledge": 0.0,
+        "instruction": 0.0,
+        "summary": 0.8333333333333334,
+        "daily": 0.14285714285714285
+      },
+      "prediction_sha256": "d03dca03f90e1502def0ba9c8fcb002892999740463c1a0689e039221c78f88d",
+      "reviews_sha256": "d9de1d7d08b1d9be7eddfbc37d9f6d7c502123cb44f4da6194c375eb4653d9c9"
+    },
+    "sft_curriculum_lr1e-4": {
+      "passed": 2,
+      "cases": 40,
+      "pass_rate": 0.05,
+      "category_pass_rates": {
+        "context": 0.0,
+        "rewrite": 0.14285714285714285,
+        "knowledge": 0.0,
+        "instruction": 0.14285714285714285,
+        "summary": 0.0,
+        "daily": 0.0
+      },
+      "prediction_sha256": "abef6b9e02bda683464640139611f4af31c1d2ceb859944002295a48c02d72af",
+      "reviews_sha256": "0f75b57edc9db8bc8c13fedc3f9b6fb121615f1d8e7b9a61555f739c20e3987a"
+    }
+  },
+  "pilot_qualified": false,
+  "next_learning_rate": 3e-05,
+  "next_experiment": "sft_curriculum_v2_formal",
+  "reason": "Both v1 candidates degrade general dev. 3e-5 is only a conservative corrective-experiment choice, not a qualified v1 winner. Repair fixed-prefix copying; broaden tasks and use 80% replay.",
+  "method": "Codex-assisted review of all 120 full general-dev responses, not independent human certification",
+  "scope": "General dev scores use minimal fact preservation for already-short summaries; copy inflation is explicit.",
+  "review_revision": "2: dev-27 high-LR plant reply re-reviewed and passed under the same minimal relevance criterion"
+}

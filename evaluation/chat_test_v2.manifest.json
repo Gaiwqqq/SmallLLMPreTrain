@@ -1,0 +1,14 @@
+{
+  "file": "chat_test_v2.jsonl",
+  "sha256": "782dfb8202273ab8db884e73e30c60ee2aea3ec9bb7d02f73f718ba59744f3a9",
+  "cases": 120,
+  "categories": {
+    "daily": 20,
+    "knowledge": 20,
+    "instruction": 20,
+    "rewrite": 20,
+    "summary": 20,
+    "context": 20
+  },
+  "policy": "Frozen before corrective v2 training; never include in training or LR selection; test families are limited and do not establish broad knowledge coverage."
+}
