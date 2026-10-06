@@ -695,10 +695,37 @@ def install_inference(workflow: Workflow):
         [uv, "venv", "--python", "3.11", str(ROOT / "envs/inference")],
         max_hours=1,
     )
+    # 新阶段名确保恢复旧 workflow 时修复已标为 complete 的无上限安装。
     workflow.run(
-        "install-vllm",
-        [uv, "pip", "install", "--python", str(ROOT / "envs/inference/bin/python"), "vllm==0.11.0"],
-        max_hours=2,
+        "pin-inference-tokenizer-v1",
+        [
+            uv,
+            "pip",
+            "install",
+            "--python",
+            str(ROOT / "envs/inference/bin/python"),
+            "-r",
+            str(ROOT / "repo/requirements/inference.txt"),
+        ],
+        max_hours=1,
+    )
+    workflow.run(
+        "inference-dependency-check",
+        [uv, "pip", "check", "--python", str(ROOT / "envs/inference/bin/python")],
+        max_hours=0.25,
+    )
+    workflow.run(
+        "inference-tokenizer-preflight",
+        [
+            str(ROOT / "envs/inference/bin/python"),
+            "scripts/inference/check_environment.py",
+            "--model",
+            str(ROOT / "exports/chat"),
+            "--output",
+            str(ROOT / "runs/inference-preflight.json"),
+        ],
+        gpu="",
+        max_hours=0.25,
     )
     workflow.run(
         "vllm-offline-smoke",
@@ -712,6 +739,19 @@ def install_inference(workflow: Workflow):
         ],
         gpu="0",
         max_hours=1,
+    )
+    workflow.run(
+        "vllm-service-smoke",
+        [
+            PYTHON,
+            "scripts/inference/start_service.py",
+            "--root",
+            str(ROOT),
+            "--model",
+            str(ROOT / "exports/chat"),
+        ],
+        gpu="0",
+        max_hours=0.25,
     )
 
 

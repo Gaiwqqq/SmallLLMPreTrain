@@ -53,3 +53,5 @@ bash scripts/inference/serve.sh "$PRETRAIN_ROOT/exports/chat"
 语义评分格式和汇总命令见 [题集说明](../evaluation/README.md)。当前题集的数量、唯一性和哈希检查已通过；正式模型的生成、语义审阅及 vLLM 验收按长任务流程执行，最新状态见 [运行记录](results.md)。
 
 交付时应有 Base/Chat、Tokenizer、完整恢复点、模型卡、统一评测与失败例子。让模型可加载是工程成果，让它能正确交流则需要这份独立能力证据。
+
+推理依赖故障的设计、恢复命令与待核验状态见 [推理恢复记录](inference_recovery.md)。服务可用不替代聊天语义评分。

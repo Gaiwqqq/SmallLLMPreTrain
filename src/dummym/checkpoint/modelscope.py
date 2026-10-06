@@ -64,6 +64,7 @@ def learning_files(repo: Path) -> list[Path]:
         "tests": {".py"},
         "evaluation": {".md", ".json", ".jsonl"},
         "data": {".md"},
+        "requirements": {".txt"},
     }
     for directory, suffixes in extensions.items():
         files.extend(
