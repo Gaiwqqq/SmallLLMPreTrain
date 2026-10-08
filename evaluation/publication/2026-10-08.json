@@ -1,0 +1,104 @@
+{
+  "verified_at_utc": "2026-10-08T05:53:08.158532+00:00",
+  "github_repository": "https://github.com/Gaiwqqq/SmallLLMPreTrain",
+  "source_commit": "ebd89a5f448a76e59e3acf35f7fae458fe7aac9b",
+  "modelscope_repository": "GaiWeiqi/SmallLLMPreTrain-English",
+  "modelscope_visibility": "private",
+  "verification": "Cloud SHA-256 blob IDs compared with local learning/export/report files and existing checkpoint SHA-256 manifests; recovery tensors were not downloaded or rehashed.",
+  "verified_files_by_kind": {
+    "learning_files": 170,
+    "model_export_files": 63,
+    "final_report_files": 14,
+    "trainer_recovery_files": 276,
+    "pretraining_recovery_files": 28
+  },
+  "exported_weights": [
+    {
+      "path": "exports/base/model.safetensors",
+      "bytes": 852643896,
+      "sha256": "d32d02801f333d46791a7830496f207bae200a2e881f5d276cc34644b74011d9"
+    },
+    {
+      "path": "exports/chat/model.safetensors",
+      "bytes": 852643896,
+      "sha256": "08442ffc8f7c50fbbf0e64b2609f39e04598045407047bbdf3f6495b86583577"
+    },
+    {
+      "path": "exports/curriculum-v2/model.safetensors",
+      "bytes": 852643896,
+      "sha256": "3a8e9dd3c21f848f31be8979d14783d0314bcbfd69d3929eb123956f866ed3f5"
+    },
+    {
+      "path": "exports/curriculum-v2-formal/model.safetensors",
+      "bytes": 852643896,
+      "sha256": "6368c2b7c0d807d4387a398cb5f1e8a920e44daf529a22b556a0a45d09996c08"
+    },
+    {
+      "path": "exports/pilot-base-lr3e4/model.safetensors",
+      "bytes": 852643896,
+      "sha256": "59306ef2986d5c3a5e10356220821c742f0fa9b6e9dcb6477c4024f975b84e6d"
+    },
+    {
+      "path": "exports/sft_curriculum_lr1e-4/model.safetensors",
+      "bytes": 852643896,
+      "sha256": "bebe9fa34fd59bb93183f85f9094353580a34e82a8bf8b7b47c9941dd9164d91"
+    },
+    {
+      "path": "exports/sft_curriculum_lr3e-5/model.safetensors",
+      "bytes": 852643896,
+      "sha256": "f956c694d178e303d75f554a9558fa0c5f2937f2c27246d386898efa60268019"
+    }
+  ],
+  "checkpoint_milestones": [
+    "m09_sft/trainer-milestones/step-000750",
+    "m09_sft/trainer-milestones/step-002000",
+    "m09_sft/trainer-milestones/step-003750",
+    "m09_sft/trainer-milestones/step-007060",
+    "sft_curriculum_lr1e-4/trainer-milestones/step-000250",
+    "sft_curriculum_lr1e-4/trainer-milestones/step-000500",
+    "sft_curriculum_lr1e-4/trainer-milestones/step-000750",
+    "sft_curriculum_lr3e-5/trainer-milestones/step-000250",
+    "sft_curriculum_lr3e-5/trainer-milestones/step-000500",
+    "sft_curriculum_lr3e-5/trainer-milestones/step-000750",
+    "sft_curriculum_v2_corrective/trainer-milestones/step-000250",
+    "sft_curriculum_v2_corrective/trainer-milestones/step-000750",
+    "sft_curriculum_v2_corrective/trainer-milestones/step-001250",
+    "sft_curriculum_v2_corrective/trainer-milestones/step-002500",
+    "sft_curriculum_v2_formal/trainer-milestones/step-000500",
+    "sft_curriculum_v2_formal/trainer-milestones/step-001250",
+    "sft_curriculum_v2_formal/trainer-milestones/step-002500",
+    "sft_curriculum_v2_formal/trainer-milestones/step-005000",
+    "m00_tiny_overfit/milestones/step-000223",
+    "m01_39m/milestones/step-003052",
+    "m02_99m_lr1e3_w100_s2026/milestones/step-003052",
+    "m02_99m_lr1e3_w100_s2027/milestones/step-003052",
+    "m02_99m_lr1e3_w300_s2026/milestones/step-003052",
+    "m02_99m_lr1e3_w300_s2027/milestones/step-003052",
+    "m02_99m_lr6e4_w100_s2026/milestones/step-003052",
+    "m02_99m_lr6e4_w100_s2027/milestones/step-003052",
+    "m04_base/milestones/step-001469",
+    "m04_base/milestones/step-003672",
+    "m04_base/milestones/step-007344",
+    "m04_base/milestones/step-014687",
+    "m04_lr_pilot_0/milestones/step-000020",
+    "m04_lr_pilot_0/milestones/step-000048",
+    "m04_lr_pilot_0/milestones/step-000096",
+    "m04_lr_pilot_0/milestones/step-000191",
+    "m04_lr_pilot_1/milestones/step-000020",
+    "m04_lr_pilot_1/milestones/step-000048",
+    "m04_lr_pilot_1/milestones/step-000096",
+    "m04_lr_pilot_1/milestones/step-000191",
+    "m04_lr_pilot_2/milestones/step-000020",
+    "m04_lr_pilot_2/milestones/step-000048",
+    "m04_lr_pilot_2/milestones/step-000096",
+    "m04_lr_pilot_2/milestones/step-000191",
+    "m04_lr_pilot_3/milestones/step-000020",
+    "m04_lr_pilot_3/milestones/step-000048",
+    "m04_lr_pilot_3/milestones/step-000096",
+    "m04_lr_pilot_3/milestones/step-000191"
+  ],
+  "final_test_overall_pass_rate": 0.125,
+  "general_chat_accepted": false,
+  "errors": [],
+  "verified": true
+}
