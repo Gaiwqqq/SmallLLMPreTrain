@@ -20,7 +20,9 @@
 6. [正式预训练](docs/05_pretraining.md)：约 213M 参数模型的训练预算。
 7. [聊天后训练](docs/06_sft.md)：SFT 和 assistant-only loss。
 8. [评测与推理](docs/07_evaluation_inference.md)：检验能力，使用 CLI/API。
-9. [工程约定](docs/engineering.md)：源码组织、审阅重点、测试与自动提交。
+9. [最终结果](docs/final_delivery.md)：逐题语义验收、失败边界与可恢复产物。
+10. [交付清单](docs/artifacts.md)：GitHub 与 ModelScope 各保存什么。
+11. [工程约定](docs/engineering.md)：源码组织、审阅重点、测试与自动提交。
 
 远程根目录固定为 `/diff/gaiwq/llm_pretrain`；环境、缓存、临时文件、数据、checkpoint、日志和导出模型均位于该目录。源码在其 `repo/` 子目录，本机源码是当前 Git 仓库。
 
@@ -28,7 +30,7 @@
 
 英文为主，首轮最多约七天。交付 Base/Chat 模型、Tokenizer、真实评测与阶段说明。目标涵盖指令遵循、摘要、改写、常识和三轮对话；小数据模型能力不作保证。未达标时交付真实结果和恢复点，追加预算另行讨论。
 
-关键代码完成验收后自动进行本地 Git commit；不会自动 push GitHub。关键 checkpoint 和阶段文档自动同步至 [ModelScope 私有模型仓库](https://modelscope.cn/models/GaiWeiqi/SmallLLMPreTrain-English)。令牌不进入 Git。
+关键代码完成验收后自动进行 Git commit。用户已授权将本次整理后的代码、文档与评测结果推送至 GitHub；发布步骤与产物对应关系见 [交付清单](docs/artifacts.md)。关键 checkpoint 和阶段文档自动同步至 [ModelScope 私有模型仓库](https://modelscope.cn/models/GaiWeiqi/SmallLLMPreTrain-English)。令牌不进入 Git。
 
 ## 源码导航
 

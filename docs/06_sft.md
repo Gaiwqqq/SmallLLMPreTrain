@@ -53,7 +53,7 @@ Trainer 会轮转删除旧 `checkpoint-*`。若上传还没完成，删除会破
 
 四卡 TRL 在 32 个合成会话上完成训练、验证与保存；`sft-interface-smoke-v4` 还检查了完整快照字段和四份 RNG，快照已实际上传。极小合成模型只验证接口，不代表当前 213M Chat 已训练完成。
 
-正式 Base 已完成全部 77 亿 token 并导出，四组 pilot 已完成，选择 LR=1e-4，正式 SFT 正在重试。阶段成果应包含 Chat 模型、模板、完整恢复点、开发对照和失败例子。下一页 [评测](07_evaluation_inference.md) 决定它是否真的能交流，进度见 [运行记录](results.md)。
+正式 Base 完成全部 77 亿 token 并导出；四组原始 pilot 选择 LR=1e-4，首轮正式 SFT 重试后完成 7,060 步。首轮语义验收未达标，随后完成双 LR 课程对照、四卡纠正实验与正式 v2 SFT。最终 v2 使用 LR=3e-5、160,000 个会话、两轮、5,000 步，已导出并归档。最终 120 题只有 15 题通过，训练完成没有实现可靠交流目标。
 
 ## 为什么把数据准备移到训练进程之外？
 
@@ -62,3 +62,9 @@ Trainer 会轮转删除旧 `checkpoint-*`。若上传还没完成，删除会破
 现在单独用 CPU 准备全部 input_ids 与 assistant_masks，显式截断到 2048、过滤没有有效 assistant 预测目标的会话，再保存 Arrow 数据。ready.json 最后原子提交，包含数据、Tokenizer、模板、划分规则及文件指纹；四卡启动时只校验和读取产物。TRL 使用 skip_prepare_dataset=True，避免再次进入长预处理屏障。
 
 这不是通过延长超时掩盖问题：CPU 预处理与 GPU 同步具有不同的生命周期，应分别管理。修改仍保留原数据顺序和会话划分；真实训练/验证数量与旧流程一致。初学者可读 `posttrain/data.py`，对照 `posttrain/sft.py` 如何接收已准备数据。详细故障证据和验证见 [运行记录](results.md)。
+
+## 课程迭代的结论
+
+早期自动筛选依据结构失败与 loss，没有证明语义正确。课程 v1 的固定字符串前缀与训练/开发数值范围偏差造成局部记忆；末轮姓名正确还掩盖了前面错误的数量更新。v2 修正这些问题、增加原对话回放，但正式两轮仍没有解决知识和状态跟踪不足。
+
+每次实验的起点、变量、配比、结果与原因见 [v1 对照](../experiments/current/sft_curriculum/README.md) 和 [v2 实验](../experiments/current/sft_curriculum_v2/README.md)。最终模型与恢复点位置见 [交付清单](artifacts.md)，逐题证据见 [最终报告](final_delivery.md)。

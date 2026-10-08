@@ -29,10 +29,13 @@
 | [77 亿 token 正式预训练](current/pretraining/README.md) | 验证更多唯一文本能否改善 Base |
 | [SFT 接口与正式对照](current/sft/README.md) | 先确认监督边界，再学习真实对话 |
 | [冻结题集与能力验收](current/evaluation/README.md) | 直接检查沟通目标，防止只看 loss |
+| [格式与状态课程双 LR 对照](current/sft_curriculum/README.md) | 用精确答案检查课程能否改善格式与状态，观察一般回复是否退化 |
+| [四卡纠正与正式 v2 SFT](current/sft_curriculum_v2/README.md) | 修复固定前缀偏差、增加原对话回放，检验更长训练是否泛化 |
+| [最终 120 题验收](../docs/final_delivery.md) | 保留每题真实理由，明确 12.5% 通过率与未达标结论 |
 
 ## 读报告时的约定
 
-每份 README 解释问题、设计理由、固定/变化条件、证据、结论边界和下一步。历史详细表格放在导读后；本次持续变化的状态以 [运行记录](../docs/results.md) 的自动阶段表为准。
+每份 README 解释问题、设计理由、固定/变化条件、证据、结论边界和下一步。历史详细表格放在导读后；本次已收尾，最终状态以 [最终交付](../docs/final_delivery.md) 与 [交付清单](../docs/artifacts.md) 为准。[运行记录](../docs/results.md) 的自动阶段表保留旧控制器历史，不代表最终 v2 状态。
 
 新实验从随机权重或明确规定的同一 Base 开始，不偷偷跨组续训。输出目录不同，产物留在远程 `runs/`；Git 保存代码与解释，ModelScope 保存模型和关键恢复点。
 
